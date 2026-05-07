@@ -300,7 +300,6 @@ func buscar(clave string, claves []string) int {
 	return -1
 }
 
-/*
 func TestIteradorInternoClaves(t *testing.T) {
 	t.Log("Valida que todas las claves sean recorridas (y una única vez) con el iterador interno")
 	clave1 := "Gato"
@@ -653,4 +652,3 @@ func TestVolumenIteradorCorte(t *testing.T) {
 	require.False(t, siguioEjecutandoCuandoNoDebia,
 		"No debería haber seguido ejecutando si encontramos un elemento que hizo que la iteración corte")
 }
-*/

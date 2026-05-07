@@ -15,7 +15,7 @@ const _TECHO_CARGA float64 = 3
 const _PISO_CARGA float64 = 0.25
 const _PROPORCION_REDIMENSION int = 2
 
-type HashMapAbierto[K comparable, V any] struct {
+type hashMapAbierto[K comparable, V any] struct {
 	datos    []TDALista.Lista[*claveValor[K, V]]
 	cantidad int
 }
@@ -25,18 +25,24 @@ type claveValor[K comparable, V any] struct {
 	valor V
 }
 
+type iterDiccionario[K comparable, V any] struct {
+	hash      *hashMapAbierto[K, V]
+	actual    int
+	iterLista TDALista.IteradorLista[*claveValor[K, V]]
+}
+
 func crearClaveValor[K comparable, V any](clave K, dato V) *claveValor[K, V] {
 	return &claveValor[K, V]{clave, dato}
 }
 
 // ----Primitivas----
 func CrearHash[K comparable, V any]() Diccionario[K, V] {
-	return &HashMapAbierto[K, V]{
+	return &hashMapAbierto[K, V]{
 		make([]TDALista.Lista[*claveValor[K, V]], _TAMAÑO_INICIAL), //Las posiciones del array apuntan a nil
 		0}
 }
 
-func (h *HashMapAbierto[K, V]) Guardar(clave K, dato V) {
+func (h *hashMapAbierto[K, V]) Guardar(clave K, dato V) {
 	h.verificarRedimension()
 	par := h.buscarClaveValor(clave)
 
@@ -47,14 +53,14 @@ func (h *HashMapAbierto[K, V]) Guardar(clave K, dato V) {
 
 	par = crearClaveValor(clave, dato)
 	h.colocarValor(par, h.datos)
-	h.cantidad += 1 //Solo si no pisa el valor
+	h.cantidad++ //Solo si no pisa el valor
 }
 
-func (h *HashMapAbierto[K, V]) Pertenece(clave K) bool {
+func (h *hashMapAbierto[K, V]) Pertenece(clave K) bool {
 	return h.buscarClaveValor(clave) != nil
 }
 
-func (h *HashMapAbierto[K, V]) Obtener(clave K) V {
+func (h *hashMapAbierto[K, V]) Obtener(clave K) V {
 	par := h.buscarClaveValor(clave)
 	if par == nil {
 		panic(_NOT_ON_HASHMAP)
@@ -63,7 +69,7 @@ func (h *HashMapAbierto[K, V]) Obtener(clave K) V {
 	return par.valor
 }
 
-func (h *HashMapAbierto[K, V]) Borrar(clave K) V {
+func (h *hashMapAbierto[K, V]) Borrar(clave K) V {
 	h.verificarRedimension()
 	i := fnvHashing(clave, len(h.datos))
 	lista := h.datos[i]
@@ -72,22 +78,23 @@ func (h *HashMapAbierto[K, V]) Borrar(clave K) V {
 		panic(_NOT_ON_HASHMAP)
 	}
 
-	iterador := lista.Iterador()
-	for iterador.HayAlgoMas() {
-		actual := iterador.VerActual()
+	for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
+		actual := iter.VerActual()
 
 		if actual.clave == clave {
 			h.cantidad--
-			return iterador.Borrar().valor
+			dato := iter.Borrar().valor
+			if lista.EstaVacia() {
+				h.datos[i] = nil
+			}
+			return dato
 		}
-
-		iterador.Avanzar()
 	}
 
 	panic(_NOT_ON_HASHMAP)
 }
 
-func (h *HashMapAbierto[K, V]) Cantidad() int {
+func (h *hashMapAbierto[K, V]) Cantidad() int {
 	return h.cantidad
 }
 
@@ -108,30 +115,28 @@ func convertirABytes[K comparable](clave K) []byte {
 
 // ----Redimension----
 
-func (h *HashMapAbierto[K, V]) obtenerFactorCarga() float64 {
+func (h *hashMapAbierto[K, V]) obtenerFactorCarga() float64 {
 	return float64(h.cantidad) / float64(len(h.datos))
 }
 
-func (h *HashMapAbierto[K, V]) redimensionar(nuevo_largo int) {
-	nueva_tabla := make([]TDALista.Lista[*claveValor[K, V]], nuevo_largo)
+func (h *hashMapAbierto[K, V]) redimensionar(nuevo_largo int) {
+	nuevaTabla := make([]TDALista.Lista[*claveValor[K, V]], nuevo_largo)
 
 	for _, lista := range h.datos {
 		if lista == nil {
 			continue
 		}
 
-		iterador := lista.Iterador()
-		for iterador.HayAlgoMas() {
-			par := iterador.VerActual()
-			h.colocarValor(par, nueva_tabla)
-			iterador.Avanzar()
+		for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
+			par := iter.VerActual()
+			h.colocarValor(par, nuevaTabla)
 		}
 	}
 
-	h.datos = nueva_tabla
+	h.datos = nuevaTabla
 }
 
-func (h *HashMapAbierto[K, V]) verificarRedimension() {
+func (h *hashMapAbierto[K, V]) verificarRedimension() {
 	factor := h.obtenerFactorCarga()
 
 	if factor >= _TECHO_CARGA {
@@ -145,7 +150,7 @@ func (h *HashMapAbierto[K, V]) verificarRedimension() {
 
 // ----Patrones reutilizables----
 
-func (h *HashMapAbierto[K, V]) buscarClaveValor(clave K) *claveValor[K, V] {
+func (h *hashMapAbierto[K, V]) buscarClaveValor(clave K) *claveValor[K, V] {
 	i := fnvHashing(clave, len(h.datos))
 	lista := h.datos[i]
 
@@ -153,25 +158,81 @@ func (h *HashMapAbierto[K, V]) buscarClaveValor(clave K) *claveValor[K, V] {
 		return nil
 	}
 
-	iterador := lista.Iterador()
-	for iterador.HayAlgoMas() {
-		actual := iterador.VerActual()
+	for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
+		actual := iter.VerActual()
 
 		if actual.clave == clave {
 			return actual
 		}
 
-		iterador.Avanzar()
 	}
 
 	return nil
 }
 
-func (h *HashMapAbierto[K, V]) colocarValor(par *claveValor[K, V], tabla []TDALista.Lista[*claveValor[K, V]]) {
+func (h *hashMapAbierto[K, V]) colocarValor(par *claveValor[K, V], tabla []TDALista.Lista[*claveValor[K, V]]) {
 	i := fnvHashing(par.clave, len(tabla))
 
 	if tabla[i] == nil {
 		tabla[i] = TDALista.CrearListaEnlazada[*claveValor[K, V]]()
 	}
 	tabla[i].InsertarPrimero(par)
+}
+
+// ----Iteradores----
+func (h *hashMapAbierto[K, V]) Iterador() IterDiccionario[K, V] {
+	for i, lista := range h.datos {
+		if lista != nil {
+			return &iterDiccionario[K, V]{h, i, lista.Iterador()}
+		}
+	}
+	return &iterDiccionario[K, V]{h, len(h.datos), nil} // diccionario vacio
+}
+
+func (i *iterDiccionario[K, V]) HayAlgoMas() bool {
+	if i.iterLista == nil {
+		return false
+	}
+	return i.iterLista.HayAlgoMas()
+}
+
+func (i *iterDiccionario[K, V]) Avanzar() {
+	if !i.HayAlgoMas() {
+		panic(_ERR_ITER_TERMINO)
+	}
+	i.iterLista.Avanzar()
+
+	if !i.iterLista.HayAlgoMas() {
+		i.actual++
+		for i.actual < len(i.hash.datos) {
+			if i.hash.datos[i.actual] != nil {
+				i.iterLista = i.hash.datos[i.actual].Iterador()
+				return
+			}
+			i.actual++
+		}
+		i.iterLista = nil
+	}
+}
+
+func (i *iterDiccionario[K, V]) VerActual() (K, V) {
+	if !i.HayAlgoMas() {
+		panic(_ERR_ITER_TERMINO)
+	}
+	par := i.iterLista.VerActual()
+	return par.clave, par.valor
+}
+
+func (h *hashMapAbierto[K, V]) Iterar(visitar func(clave K, valor V) bool) {
+	for _, lista := range h.datos {
+		if lista == nil {
+			continue
+		}
+		for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
+			par := iter.VerActual()
+			if !visitar(par.clave, par.valor) {
+				return
+			}
+		}
+	}
 }
