@@ -1,5 +1,7 @@
 package diccionario
 
+import TDAPila "tdas/pila"
+
 const _ERR_NO_PERTENECE string = "La clave no pertenece al diccionario"
 
 type nodoAb[K comparable, V any] struct {
@@ -14,11 +16,6 @@ type arbolBinarioBusqueda[K comparable, V any] struct {
 	comparar func(K, K) int
 	cantidad int
 }
-
-// type diccionarioOrdenado[K comparable, V any] struct {
-// abb[K, V]
-//
-// }
 
 func crearNodoAb[K comparable, V any](clave K, valor V) *nodoAb[K, V] {
 	return &nodoAb[K, V]{
@@ -37,23 +34,25 @@ func CrearABB[K comparable, V any](funcion_cmp func(K, K) int) DiccionarioOrdena
 	}
 }
 
-func (abb *arbolBinarioBusqueda[K, V]) buscarPorClave(nodoActual *nodoAb[K, V], clave K) *nodoAb[K, V] {
+func (abb *arbolBinarioBusqueda[K, V]) buscarPorClave(nodoActual *nodoAb[K, V], padre *nodoAb[K, V], clave K) (*nodoAb[K, V], *nodoAb[K, V]) {
 	if nodoActual == nil {
-		return nodoActual
+		return padre, nodoActual
 	}
 
-	comparacion := abb.comparar(nodoActual.clave, clave)
-
-	if comparacion < 0 {
-		return abb.buscarPorClave(nodoActual.der, clave)
-	} else if comparacion > 0 {
-		return abb.buscarPorClave(nodoActual.izq, clave)
-	} else {
-		return nodoActual
+	if abb.esMenor(nodoActual.clave, clave) {
+		return abb.buscarPorClave(nodoActual.der, nodoActual, clave)
 	}
+
+	if abb.esMayor(nodoActual.clave, clave) {
+		return abb.buscarPorClave(nodoActual.izq, nodoActual, clave)
+	}
+
+	return padre, nodoActual
 }
 
 func (abb *arbolBinarioBusqueda[K, V]) guardar(nodoActual *nodoAb[K, V], clave K, valor V) *nodoAb[K, V] {
+	//TODO reutilizar la busqueda por clave para guardar
+
 	if nodoActual == nil {
 		abb.cantidad++
 		return crearNodoAb(clave, valor)
@@ -67,6 +66,7 @@ func (abb *arbolBinarioBusqueda[K, V]) guardar(nodoActual *nodoAb[K, V], clave K
 	} else {
 		nodoActual.valor = valor // Pisamos el valor anterior
 	}
+
 	return nodoActual
 }
 
@@ -74,12 +74,28 @@ func (abb *arbolBinarioBusqueda[K, V]) Guardar(clave K, valor V) {
 	abb.raiz = abb.guardar(abb.raiz, clave, valor)
 }
 
+/*
+func (abb *arbolBinarioBusqueda[K, V]) Guardarmejora(clave K, valor V) {
+	padre, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
+
+	if hijo != nil {
+		hijo.valor = valor
+	}
+
+	abb.cantidad++
+
+	if abb.esMayor(padre.clave, clave) {
+		padre.izq
+	}
+}*/
+
 func (abb *arbolBinarioBusqueda[K, V]) Pertenece(clave K) bool {
-	return abb.buscarPorClave(abb.raiz, clave) != nil
+	_, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
+	return hijo != nil
 }
 
 func (abb *arbolBinarioBusqueda[K, V]) Obtener(clave K) V {
-	nodoEncontrado := abb.buscarPorClave(abb.raiz, clave)
+	_, nodoEncontrado := abb.buscarPorClave(abb.raiz, nil, clave)
 	if nodoEncontrado == nil {
 		panic(_ERR_NO_PERTENECE)
 	}
@@ -122,6 +138,8 @@ func (abb *arbolBinarioBusqueda[K, V]) borrarNodo(nodoABorrar *nodoAb[K, V]) (*n
 }
 
 func (abb *arbolBinarioBusqueda[K, V]) borrar(nodoActual *nodoAb[K, V], clave K) (*nodoAb[K, V], V) {
+	//TODO se puede utilizar la funcion de buscar para hacer esto.
+
 	if nodoActual == nil {
 		panic(_ERR_NO_PERTENECE)
 	}
@@ -141,4 +159,78 @@ func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
 	nuevaRaiz, dato := abb.borrar(abb.raiz, clave)
 	abb.raiz = nuevaRaiz
 	return dato
+}
+
+// --- Comparacion ---
+func (abb *arbolBinarioBusqueda[K, V]) esMayor(a K, b K) bool {
+	return abb.comparar(a, b) > 0
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) esMenor(a K, b K) bool {
+	return abb.comparar(a, b) < 0
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) esIgual(a K, b K) bool {
+	return abb.comparar(a, b) == 0
+}
+
+// ---Iteradores---
+type iteradorDiccionarioOrdenado[K comparable, V any] struct {
+	abb   *arbolBinarioBusqueda[K, V]
+	pila  TDAPila.Pila[*nodoAb[K, V]]
+	desde *K
+	hasta *K
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) Iterar(visitar func(clave K, dato V) bool) {
+	abb.IterarRango(nil, nil, visitar)
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) Iterador() IterDiccionario[K, V] {
+	return abb.IteradorRango(nil, nil)
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
+	pila := TDAPila.CrearPilaDinamica[*nodoAb[K, V]]()
+	abb.apilarMenoresyActual(abb.raiz, desde, hasta, pila)
+	for !pila.EstaVacia() {
+		nodo := pila.Desapilar().der
+		abb.apilarMenoresyActual(nodo, desde, hasta, pila)
+	}
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
+	iter := iteradorDiccionarioOrdenado[K, V]{abb, TDAPila.CrearPilaDinamica[*nodoAb[K, V]](), desde, hasta}
+	abb.apilarMenoresyActual(abb.raiz, desde, hasta, iter.pila)
+	return iter
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) apilarMenoresyActual(nodoActual *nodoAb[K, V], desde *K, hasta *K, pila TDAPila.Pila[*nodoAb[K, V]]) {
+	for nodoActual != nil {
+		if desde != nil && abb.esMenor(nodoActual.clave, *desde) {
+			nodoActual = nodoActual.der
+			continue
+		}
+
+		if hasta != nil && abb.esMayor(nodoActual.clave, *hasta) {
+			nodoActual = nodoActual.izq
+			continue
+		}
+
+		pila.Apilar(nodoActual)
+		nodoActual = nodoActual.izq
+	}
+}
+
+func (iter iteradorDiccionarioOrdenado[K, V]) Avanzar() {
+	nodo := iter.pila.Desapilar().der
+	iter.abb.apilarMenoresyActual(nodo, iter.desde, iter.hasta, iter.pila)
+}
+
+func (iter iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
+	return !iter.pila.EstaVacia()
+}
+
+func (iter iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
+	return iter.pila.VerTope().clave, iter.pila.VerTope().valor
 }
