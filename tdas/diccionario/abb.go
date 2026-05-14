@@ -194,8 +194,9 @@ func (abb *arbolBinarioBusqueda[K, V]) IterarRango(desde *K, hasta *K, visitar f
 	pila := TDAPila.CrearPilaDinamica[*nodoAb[K, V]]()
 	abb.apilarMenoresyActual(abb.raiz, desde, hasta, pila)
 	for !pila.EstaVacia() {
-		nodo := pila.Desapilar().der
-		abb.apilarMenoresyActual(nodo, desde, hasta, pila)
+		nodo := pila.Desapilar()
+		visitar(nodo.clave, nodo.valor)
+		abb.apilarMenoresyActual(nodo.der, desde, hasta, pila)
 	}
 }
 
