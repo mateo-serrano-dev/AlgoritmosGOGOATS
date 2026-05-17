@@ -1,8 +1,9 @@
 package heap
 
-const TAMAÑO_INICIAL int = 16
-const PROPORCION_MINIMA int = 4
-const PROPORCION_REDIMENSION int = 2
+const _TAMAÑO_INICIAL int = 16
+const _PROPORCION_MINIMA int = 4
+const _PROPORCION_REDIMENSION int = 2
+const _ERROR_VACIA = "La cola esta vacia"
 
 type heap[T any] struct {
 	arr      []T
@@ -17,7 +18,7 @@ type heap[T any] struct {
 
 // --- Creacion ---
 func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
-	return heap[T]{make([]T, TAMAÑO_INICIAL), funcion_cmp, 0}
+	return &heap[T]{make([]T, _TAMAÑO_INICIAL), funcion_cmp, 0}
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
@@ -29,54 +30,69 @@ func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[
 		heap.downheap(i)
 	}
 
-	return heap
+	return &heap
 }
 
 // --- Primitivas ---
-func (h heap[T]) EstaVacia() bool {
-	return len(h.arr) == 0
+func (h *heap[T]) EstaVacia() bool {
+	return h.cantidad == 0
 }
 
-func (h heap[T]) Encolar(elemento T) {
+func (h *heap[T]) Encolar(elemento T) {
 	if len(h.arr) <= h.cantidad {
-		h.redimensionar(len(h.arr) * PROPORCION_REDIMENSION)
+		h.redimensionar(len(h.arr) * _PROPORCION_REDIMENSION)
 	}
 
 	h.arr[h.cantidad] = elemento
-	h.cantidad++
 	h.upheap(h.cantidad)
+	h.cantidad++
 }
 
-func (h heap[T]) VerMax() T {
+func (h *heap[T]) VerMax() T {
+	if h.cantidad <= 0 {
+		panic(_ERROR_VACIA)
+	}
+
 	return h.arr[0]
 }
 
-func (h heap[T]) Desencolar() T {
+func (h *heap[T]) Desencolar() T {
 	result := h.VerMax()
-	h.swap(&h.arr[0], &h.arr[h.cantidad])
-	h.downheap(0)
+	h.swap(&h.arr[0], &h.arr[h.cantidad-1])
 	h.cantidad--
+	h.downheap(0)
 
-	if len(h.arr) > TAMAÑO_INICIAL && h.cantidad <= len(h.arr)/PROPORCION_MINIMA {
-		h.redimensionar(len(h.arr) / PROPORCION_REDIMENSION)
+	if len(h.arr) > _TAMAÑO_INICIAL && h.cantidad <= len(h.arr)/_PROPORCION_MINIMA {
+		h.redimensionar(len(h.arr) / _PROPORCION_REDIMENSION)
 	}
 
 	return result
 }
 
-func (h heap[T]) Cantidad() int {
+func (h *heap[T]) Cantidad() int {
 	return h.cantidad
 }
 
 // --- Acciones internas ---
 
-func (h heap[T]) upheap(i int) {
-	for h.comparar(h.arr[i], h.arr[padre(i)]) > 0 {
-		h.swap(&h.arr[i], &h.arr[padre(i)])
+func (h *heap[T]) upheap(i int) {
+	for true {
+		padre := padre(i)
+		if padre < 0 {
+			return
+		}
+
+		if h.comparar(h.arr[i], h.arr[padre]) > 0 {
+			h.swap(&h.arr[i], &h.arr[padre])
+			i = padre
+			continue
+		}
+
+		return
 	}
 }
 
-func (h heap[T]) downheap(i int) {
+func (h *heap[T]) downheap(i int) {
 	for true {
 		var mayor int
 		var menor int
@@ -91,13 +107,13 @@ func (h heap[T]) downheap(i int) {
 			menor = izq
 		}
 
-		if h.comparar(h.arr[i], h.arr[mayor]) < 0 {
-			i = mayor
+		if mayor < h.cantidad && h.comparar(h.arr[i], h.arr[mayor]) < 0 {
 			h.swap(&h.arr[i], &h.arr[mayor])
+			i = mayor
 			continue
-		} else if h.comparar(h.arr[i], h.arr[menor]) < 0 {
-			i = menor
+		} else if menor < h.cantidad && h.comparar(h.arr[i], h.arr[menor]) < 0 {
 			h.swap(&h.arr[i], &h.arr[menor])
+			i = menor
 			continue
 		}
 
@@ -105,7 +121,7 @@ func (h heap[T]) downheap(i int) {
 	}
 }
 
-func (h heap[T]) redimensionar(dimension int) {
+func (h *heap[T]) redimensionar(dimension int) {
 	nuevo_arreglo := make([]T, dimension)
 	for i := 0; i <= dimension; i++ {
 		nuevo_arreglo[i] = h.arr[i]
@@ -118,7 +134,7 @@ func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
 }
 
-func (h heap[T]) swap(x *T, y *T) {
+func (h *heap[T]) swap(x *T, y *T) {
 	*x, *y = *y, *x
 }
 
