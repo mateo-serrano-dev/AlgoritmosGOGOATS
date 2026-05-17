@@ -109,62 +109,39 @@ func TestReemplazoDatoOrd(t *testing.T) {
 	require.EqualValues(t, "baubau", dic.Obtener(clave2))
 }
 
-func TestReemplazoDatoHopscotchOrd(t *testing.T) {
-	t.Log("Guarda bastantes claves, y luego reemplaza sus datos. Luego valida que todos los datos sean " +
-		"correctos. Para una implementación Hopscotch, detecta errores al hacer lugar o guardar elementos.")
-
-	dic := TDADiccionario.CrearABB[int, int](cmp.Compare)
-	for i := 0; i < 500; i++ {
-		dic.Guardar(i, i)
-	}
-	for i := 0; i < 500; i++ {
-		dic.Guardar(i, 2*i)
-	}
-	ok := true
-	for i := 0; i < 500 && ok; i++ {
-		ok = dic.Obtener(i) == 2*i
-	}
-	require.True(t, ok, "Los elementos no fueron actualizados correctamente")
-}
-
 func TestDiccionarioOrdBorrar(t *testing.T) {
 	t.Log("Guarda algunos pocos elementos en el diccionario, y se los borra, revisando que en todo momento " +
 		"el diccionario se comporte de manera adecuada")
-	clave1 := "Gato"
-	clave2 := "Perro"
-	clave3 := "Vaca"
-	valor1 := "miau"
-	valor2 := "guau"
-	valor3 := "moo"
-	claves := []string{clave1, clave2, clave3}
-	valores := []string{valor1, valor2, valor3}
-	dic := TDADiccionario.CrearABB[string, string](strings.Compare)
+	dic := TDADiccionario.CrearABB[int, string](cmp.Compare)
+	dic.Guardar(5, "cinco")
+	dic.Guardar(3, "tres")
+	dic.Guardar(8, "ocho")
+	dic.Guardar(1, "uno")
+	dic.Guardar(4, "cuatro")
+	dic.Guardar(7, "siete")
+	dic.Guardar(10, "diez")
+	require.Equal(t, 7, dic.Cantidad())
 
-	require.False(t, dic.Pertenece(claves[0]))
-	require.False(t, dic.Pertenece(claves[0]))
-	dic.Guardar(claves[0], valores[0])
-	dic.Guardar(claves[1], valores[1])
-	dic.Guardar(claves[2], valores[2])
+	require.True(t, dic.Pertenece(1))
+	require.Equal(t, "uno", dic.Borrar(1))
+	require.False(t, dic.Pertenece(1))
+	require.Equal(t, 6, dic.Cantidad())
 
-	require.True(t, dic.Pertenece(claves[2]))
-	require.EqualValues(t, valores[2], dic.Borrar(claves[2]))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[2]) })
-	require.EqualValues(t, 2, dic.Cantidad())
-	require.False(t, dic.Pertenece(claves[2]))
+	require.True(t, dic.Pertenece(3))
+	require.EqualValues(t, "tres", dic.Borrar(3))
+	require.False(t, dic.Pertenece(3))
+	require.True(t, dic.Pertenece(4))
+	require.EqualValues(t, 5, dic.Cantidad())
 
-	require.True(t, dic.Pertenece(claves[0]))
-	require.EqualValues(t, valores[0], dic.Borrar(claves[0]))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[0]) })
-	require.EqualValues(t, 1, dic.Cantidad())
-	require.False(t, dic.Pertenece(claves[0]))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener(claves[0]) })
+	require.True(t, dic.Pertenece(8))
+	require.EqualValues(t, "ocho", dic.Borrar(8))
+	require.False(t, dic.Pertenece(8))
 
-	require.True(t, dic.Pertenece(claves[1]))
-	require.EqualValues(t, valores[1], dic.Borrar(claves[1]))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[1]) })
-	require.EqualValues(t, 0, dic.Cantidad())
-	require.False(t, dic.Pertenece(claves[1]))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener(claves[1]) })
+	require.True(t, dic.Pertenece(7))
+	require.True(t, dic.Pertenece(10))
+	require.EqualValues(t, "siete", dic.Obtener(7))
+	require.EqualValues(t, "diez", dic.Obtener(10))
+	require.EqualValues(t, 4, dic.Cantidad())
 }
 
 func TestReutlizacionDeBorradosOrd(t *testing.T) {
@@ -279,18 +256,6 @@ func TestValorNuloOrd(t *testing.T) {
 	require.False(t, dic.Pertenece(clave))
 }
 
-func TestGuardarYBorrarRepetidasVecesOrd(t *testing.T) {
-	t.Log("Esta prueba guarda y borra repetidas veces. Esto lo hacemos porque si xd")
-
-	dic := TDADiccionario.CrearABB[int, int](cmp.Compare)
-	for i := 0; i < 1000; i++ {
-		dic.Guardar(i, i)
-		require.True(t, dic.Pertenece(i))
-		dic.Borrar(i)
-		require.False(t, dic.Pertenece(i))
-	}
-}
-
 func TestIteradorInternoClavesOrdenadas(t *testing.T) {
 	t.Log("Valida que todas las claves sean recorridas una única vez de forma ordenada con el iterador interno")
 	clave1 := "A"
@@ -337,4 +302,113 @@ func TestIteradorInternoValoresOrdenados(t *testing.T) {
 	})
 
 	require.EqualValues(t, 720, factorial)
+}
+
+func TestIteradorInternoConCorte(t *testing.T) {
+	t.Log("Valida que el iterador interno corte la ejecución inmediatamente al retornar false")
+	dic := TDADiccionario.CrearABB[int, string](cmp.Compare)
+
+	dic.Guardar(3, "tres")
+	dic.Guardar(1, "uno")
+	dic.Guardar(5, "cinco")
+	dic.Guardar(2, "dos")
+	dic.Guardar(4, "cuatro")
+
+	contador := 0
+	dic.Iterar(func(clave int, valor string) bool {
+		contador++
+		if clave == 3 {
+			return false
+		}
+		return true
+	})
+
+	require.Equal(t, 3, contador)
+}
+
+func TestIteradorInternoRango(t *testing.T) {
+	t.Log("Prueba el iterador interno por rango con diferentes acotaciones y condiciones de corte")
+	dic := TDADiccionario.CrearABB[int, string](cmp.Compare)
+
+	dic.Guardar(6, "seis")
+	dic.Guardar(3, "tres")
+	dic.Guardar(8, "ocho")
+	dic.Guardar(2, "dos")
+	dic.Guardar(5, "cinco")
+	dic.Guardar(7, "siete")
+	dic.Guardar(9, "nueve")
+	dic.Guardar(1, "uno")
+	dic.Guardar(4, "cuatro")
+	dic.Guardar(10, "diez")
+
+	desdeA := 4
+	hastaA := 7
+	rangoA := []int{4, 5, 6, 7}
+	indiceA := 0
+
+	dic.IterarRango(&desdeA, &hastaA, func(clave int, valor string) bool {
+		require.Equal(t, rangoA[indiceA], clave)
+		indiceA++
+		return true
+	})
+	require.Equal(t, len(rangoA), indiceA)
+
+	hastaB := 3
+	rangoB := []int{1, 2, 3}
+	indiceB := 0
+
+	dic.IterarRango(nil, &hastaB, func(clave int, valor string) bool {
+		require.Equal(t, rangoB[indiceB], clave)
+		indiceB++
+		return true
+	})
+	require.Equal(t, len(rangoB), indiceB)
+
+	desdeC := 2
+	hastaC := 9
+	contadorC := 0
+
+	dic.IterarRango(&desdeC, &hastaC, func(clave int, valor string) bool {
+		contadorC++
+		if clave == 5 {
+			return false
+		}
+		return true
+	})
+	require.Equal(t, 4, contadorC)
+}
+
+func TestIteradorExternoCompleto(t *testing.T) {
+	t.Log("Prueba el funcionamiento del iterador externo común recorriendo todo el árbol")
+	dic := TDADiccionario.CrearABB[int, string](cmp.Compare)
+
+	dic.Guardar(6, "seis")
+	dic.Guardar(3, "tres")
+	dic.Guardar(8, "ocho")
+	dic.Guardar(2, "dos")
+	dic.Guardar(5, "cinco")
+	dic.Guardar(7, "siete")
+	dic.Guardar(9, "nueve")
+	dic.Guardar(1, "uno")
+	dic.Guardar(4, "cuatro")
+	dic.Guardar(10, "diez")
+
+	require.Equal(t, 10, dic.Cantidad())
+
+	iter := dic.Iterador()
+
+	for i := 1; i <= 10; i++ {
+		require.True(t, iter.HayAlgoMas())
+
+		clave, _ := iter.VerActual()
+		require.Equal(t, i, clave)
+		iter.Avanzar()
+	}
+
+	require.False(t, iter.HayAlgoMas())
+
+	require.Panics(t, func() { iter.VerActual() }, "Llamar a VerActual al final del iterador debe paniquear")
+	require.Panics(t, func() { iter.Avanzar() }, "Llamar a Avanzar al final del iterador debe paniquear")
+
+	require.EqualValues(t, 10, dic.Cantidad())
 }

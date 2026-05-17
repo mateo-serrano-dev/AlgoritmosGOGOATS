@@ -50,44 +50,25 @@ func (abb *arbolBinarioBusqueda[K, V]) buscarPorClave(nodoActual *nodoAb[K, V], 
 	return padre, nodoActual
 }
 
-func (abb *arbolBinarioBusqueda[K, V]) guardar(nodoActual *nodoAb[K, V], clave K, valor V) *nodoAb[K, V] {
-	//TODO reutilizar la busqueda por clave para guardar
-
-	if nodoActual == nil {
-		abb.cantidad++
-		return crearNodoAb(clave, valor)
-	}
-
-	comparacion := abb.comparar(nodoActual.clave, clave)
-	if comparacion < 0 {
-		nodoActual.der = abb.guardar(nodoActual.der, clave, valor)
-	} else if comparacion > 0 {
-		nodoActual.izq = abb.guardar(nodoActual.izq, clave, valor)
-	} else {
-		nodoActual.valor = valor // Pisamos el valor anterior
-	}
-
-	return nodoActual
-}
-
 func (abb *arbolBinarioBusqueda[K, V]) Guardar(clave K, valor V) {
-	abb.raiz = abb.guardar(abb.raiz, clave, valor)
-}
-
-/*
-func (abb *arbolBinarioBusqueda[K, V]) Guardarmejora(clave K, valor V) {
 	padre, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
-
 	if hijo != nil {
+		// caso clave ya pertenece
 		hijo.valor = valor
+		return
 	}
-
+	nodoNuevo := crearNodoAb(clave, valor)
+	if padre == nil {
+		// caso arbol vacio
+		abb.raiz = nodoNuevo
+	} else if abb.esMayor(clave, padre.clave) {
+		// caso clave nueva
+		padre.der = nodoNuevo
+	} else {
+		padre.izq = nodoNuevo
+	}
 	abb.cantidad++
-
-	if abb.esMayor(padre.clave, clave) {
-		padre.izq
-	}
-}*/
+}
 
 func (abb *arbolBinarioBusqueda[K, V]) Pertenece(clave K) bool {
 	_, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
@@ -106,59 +87,49 @@ func (abb *arbolBinarioBusqueda[K, V]) Cantidad() int {
 	return abb.cantidad
 }
 
-func buscarMinimo[K comparable, V any](nodoActual *nodoAb[K, V]) *nodoAb[K, V] {
+func (abb *arbolBinarioBusqueda[K, V]) buscarMinimo(nodoActual, padre *nodoAb[K, V]) (*nodoAb[K, V], *nodoAb[K, V]) {
 	for nodoActual.izq != nil {
+		padre = nodoActual
 		nodoActual = nodoActual.izq
 	}
-	return nodoActual
-}
-
-func (abb *arbolBinarioBusqueda[K, V]) borrarNodo(nodoABorrar *nodoAb[K, V]) (*nodoAb[K, V], V) {
-	borrado := nodoABorrar.valor
-
-	// Casos base (0 o 1 hijo)
-	if nodoABorrar.izq == nil {
-		abb.cantidad--
-		return nodoABorrar.der, borrado // si nodoABorrar.der es nil, se pisa el nodo que queremos borrar con nil
-	}
-	if nodoABorrar.der == nil {
-		abb.cantidad--
-		return nodoABorrar.izq, borrado
-	}
-
-	// Reemplazamos con el menor de sus hijos derechos
-	nodoReemplazo := buscarMinimo(nodoABorrar.der)
-
-	// Este llamado llega al caso base (no es necesario hacer abb.cantidad--)
-	nodoABorrar.der, _ = abb.borrar(nodoABorrar.der, nodoReemplazo.clave)
-
-	// Pisamos los datos del nodo que queremos borrar
-	nodoABorrar.clave, nodoABorrar.valor = nodoReemplazo.clave, nodoReemplazo.valor
-	return nodoABorrar, borrado
-}
-
-func (abb *arbolBinarioBusqueda[K, V]) borrar(nodoActual *nodoAb[K, V], clave K) (*nodoAb[K, V], V) {
-	//TODO se puede utilizar la funcion de buscar para hacer esto.
-
-	if nodoActual == nil {
-		panic(_ERR_NO_PERTENECE)
-	}
-	var valor V
-	comparacion := abb.comparar(nodoActual.clave, clave)
-	if comparacion < 0 {
-		nodoActual.der, valor = abb.borrar(nodoActual.der, clave)
-		return nodoActual, valor
-	} else if comparacion > 0 {
-		nodoActual.izq, valor = abb.borrar(nodoActual.izq, clave)
-		return nodoActual, valor
-	}
-	return abb.borrarNodo(nodoActual)
+	return padre, nodoActual
 }
 
 func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
-	nuevaRaiz, dato := abb.borrar(abb.raiz, clave)
-	abb.raiz = nuevaRaiz
-	return dato
+	padre, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
+	if hijo == nil {
+		panic(_ERR_NO_PERTENECE)
+	}
+
+	borrado := hijo.valor
+
+	// caso 2 hijos
+	if hijo.der != nil && hijo.izq != nil {
+		_, sucesor := abb.buscarMinimo(hijo.der, hijo)
+		k := sucesor.clave
+		v := abb.Borrar(k)
+		hijo.clave = k
+		hijo.valor = v
+		return borrado
+	}
+
+	// casos de 0 o 1 hijo
+	var reemplazo *nodoAb[K, V]
+	if hijo.izq == nil {
+		reemplazo = hijo.der
+	} else {
+		reemplazo = hijo.izq
+	}
+
+	if padre == nil {
+		abb.raiz = reemplazo
+	} else if padre.izq == hijo {
+		padre.izq = reemplazo
+	} else {
+		padre.der = reemplazo
+	}
+	abb.cantidad--
+	return borrado
 }
 
 // --- Comparacion ---
@@ -195,13 +166,15 @@ func (abb *arbolBinarioBusqueda[K, V]) IterarRango(desde *K, hasta *K, visitar f
 	abb.apilarMenoresyActual(abb.raiz, desde, hasta, pila)
 	for !pila.EstaVacia() {
 		nodo := pila.Desapilar()
-		visitar(nodo.clave, nodo.valor)
+		if !visitar(nodo.clave, nodo.valor) {
+			return
+		}
 		abb.apilarMenoresyActual(nodo.der, desde, hasta, pila)
 	}
 }
 
 func (abb *arbolBinarioBusqueda[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
-	iter := iteradorDiccionarioOrdenado[K, V]{abb, TDAPila.CrearPilaDinamica[*nodoAb[K, V]](), desde, hasta}
+	iter := &iteradorDiccionarioOrdenado[K, V]{abb, TDAPila.CrearPilaDinamica[*nodoAb[K, V]](), desde, hasta}
 	abb.apilarMenoresyActual(abb.raiz, desde, hasta, iter.pila)
 	return iter
 }
@@ -223,15 +196,15 @@ func (abb *arbolBinarioBusqueda[K, V]) apilarMenoresyActual(nodoActual *nodoAb[K
 	}
 }
 
-func (iter iteradorDiccionarioOrdenado[K, V]) Avanzar() {
+func (iter *iteradorDiccionarioOrdenado[K, V]) Avanzar() {
 	nodo := iter.pila.Desapilar().der
 	iter.abb.apilarMenoresyActual(nodo, iter.desde, iter.hasta, iter.pila)
 }
 
-func (iter iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
+func (iter *iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
 	return !iter.pila.EstaVacia()
 }
 
-func (iter iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
+func (iter *iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
 	return iter.pila.VerTope().clave, iter.pila.VerTope().valor
 }
