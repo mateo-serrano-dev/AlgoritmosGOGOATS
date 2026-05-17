@@ -3,6 +3,7 @@ package diccionario
 import TDAPila "tdas/pila"
 
 const _ERR_NO_PERTENECE string = "La clave no pertenece al diccionario"
+const _ERROR_ITER_TERMINO string = "El iterador termino de iterar"
 
 type nodoAb[K comparable, V any] struct {
 	izq   *nodoAb[K, V]
@@ -197,6 +198,9 @@ func (abb *arbolBinarioBusqueda[K, V]) apilarMenoresyActual(nodoActual *nodoAb[K
 }
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) Avanzar() {
+	if !iter.HayAlgoMas() {
+		panic(_ERROR_ITER_TERMINO)
+	}
 	nodo := iter.pila.Desapilar().der
 	iter.abb.apilarMenoresyActual(nodo, iter.desde, iter.hasta, iter.pila)
 }
@@ -206,5 +210,8 @@ func (iter *iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
 }
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
+	if !iter.HayAlgoMas() {
+		panic(_ERROR_ITER_TERMINO)
+	}
 	return iter.pila.VerTope().clave, iter.pila.VerTope().valor
 }
