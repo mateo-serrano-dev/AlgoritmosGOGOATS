@@ -10,7 +10,7 @@ type heap[T any] struct {
 	cantidad int
 }
 
-//Funcion de comparar (a, b)
+// Funcion de comparar (a, b)
 // negativo si a < b
 // 0 si a == b
 // positivo si a > b
@@ -83,7 +83,7 @@ func (h heap[T]) downheap(i int) {
 		izq := izq(i)
 		der := der(i)
 
-		if h.comparar(h.arr[izq], h.arr[der]) < 0 {
+		if h.comparar(h.arr[der], h.arr[izq]) < 0 {
 			mayor = izq
 			menor = der
 		} else {
