@@ -22,14 +22,10 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-	var nuevo_arreglo []T
-	copy(nuevo_arreglo, arreglo)
-	heap := heap[T]{nuevo_arreglo, funcion_cmp, len(nuevo_arreglo)}
-
-	for i := len(arreglo) - 1; i >= 0; i-- {
-		heap.downheap(i)
-	}
-
+	nuevoArreglo := make([]T, len(arreglo))
+	copy(nuevoArreglo, arreglo)
+	heap := heap[T]{nuevoArreglo, funcion_cmp, len(nuevoArreglo)}
+	heap.heapify()
 	return &heap
 }
 
@@ -49,7 +45,7 @@ func (h *heap[T]) Encolar(elemento T) {
 }
 
 func (h *heap[T]) VerMax() T {
-	if h.cantidad <= 0 {
+	if h.EstaVacia() {
 		panic(_ERROR_VACIA)
 	}
 
@@ -78,60 +74,62 @@ func (h *heap[T]) Cantidad() int {
 func (h *heap[T]) upheap(i int) {
 	for true {
 		padre := padre(i)
-		if padre < 0 {
-			return
-		}
-
 		if h.comparar(h.arr[i], h.arr[padre]) > 0 {
 			h.swap(&h.arr[i], &h.arr[padre])
 			i = padre
-			continue
+		} else {
+			return
 		}
-
-		return
 	}
 }
 
 func (h *heap[T]) downheap(i int) {
 	for true {
-		var mayor int
-		var menor int
 		izq := izq(i)
 		der := der(i)
+		mayor := i
 
-		if h.comparar(h.arr[der], h.arr[izq]) < 0 {
+		if izq < h.cantidad && h.comparar(h.arr[izq], h.arr[mayor]) > 0 {
 			mayor = izq
-			menor = der
-		} else {
-			mayor = der
-			menor = izq
 		}
 
-		if mayor < h.cantidad && h.comparar(h.arr[i], h.arr[mayor]) < 0 {
+		if der < h.cantidad && h.comparar(h.arr[der], h.arr[mayor]) > 0 {
+			mayor = der
+		}
+
+		if mayor != i {
 			h.swap(&h.arr[i], &h.arr[mayor])
 			i = mayor
-			continue
-		} else if menor < h.cantidad && h.comparar(h.arr[i], h.arr[menor]) < 0 {
-			h.swap(&h.arr[i], &h.arr[menor])
-			i = menor
-			continue
+		} else {
+			break
 		}
-
-		break
 	}
 }
 
-func (h *heap[T]) redimensionar(dimension int) {
-	nuevo_arreglo := make([]T, dimension)
-	for i := 0; i <= dimension; i++ {
-		nuevo_arreglo[i] = h.arr[i]
-	}
-	h.arr = nuevo_arreglo
+func (h *heap[T]) redimensionar(nuevaCapacidad int) {
+	nuevoArreglo := make([]T, nuevaCapacidad)
+	copy(nuevoArreglo, h.arr)
+	h.arr = nuevoArreglo
 }
 
 // --- Miscelaneo ---
-func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
+func (h *heap[T]) heapify() {
+	for i := (len(h.arr) / 2) - 1; i >= 0; i-- {
+		h.downheap(i)
+	}
+}
 
+func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
+	if len(elementos) < 2 {
+		return
+	}
+	heap := &heap[T]{elementos, funcion_cmp, len(elementos)}
+	heap.heapify()
+	for heap.cantidad > 1 {
+		heap.swap(&heap.arr[0], &heap.arr[heap.cantidad-1])
+		heap.cantidad--
+		heap.downheap(0)
+	}
 }
 
 func (h *heap[T]) swap(x *T, y *T) {
