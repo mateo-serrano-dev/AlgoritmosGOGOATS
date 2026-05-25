@@ -1,14 +1,23 @@
 package database
 
 import (
+	"strings"
 	Dict "tdas/diccionario"
 	Modelos "tp2/models"
 )
 
 type Database struct {
-	pacientes Dict.Diccionario[string, *Modelos.Paciente]
-	//doctores  Dict.DiccionarioOrdenado[string, *Doctor]
+	pacientes      Dict.Diccionario[string, *Modelos.Paciente]
+	doctores       Dict.DiccionarioOrdenado[string, *Modelos.Doctor]
 	especialidades Dict.Diccionario[string, *Modelos.Especialidad]
+}
+
+func CrearDatabase() *Database {
+	db := new(Database)
+	db.pacientes = Dict.CrearHash[string, *Modelos.Paciente]()
+	db.doctores = Dict.CrearABB[string, *Modelos.Doctor](strings.Compare)
+	db.especialidades = Dict.CrearHash[string, *Modelos.Especialidad]()
+	return db
 }
 
 func (db *Database) ExistePaciente(nombre string) bool {
@@ -29,6 +38,12 @@ func (db *Database) agregarEspecialidad(nombre string) *Modelos.Especialidad {
 	e := Modelos.CrearEspecialidad()
 	db.especialidades.Guardar(nombre, e)
 	return e
+}
+
+func (db *Database) agregarDoctor(nombre string, especialidad string) *Modelos.Doctor {
+	d := Modelos.CrearDoctor(nombre, especialidad)
+	db.doctores.Guardar(nombre, d)
+	return d
 }
 
 func (db *Database) EncolarTurno(nombre string, año int, urgencia string, especialidad string) {
