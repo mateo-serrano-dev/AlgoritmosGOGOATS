@@ -25,8 +25,8 @@ type AtenderPaciente struct{ ComandoBase }
 type InformeDoctores struct{ ComandoBase }
 
 func (c PedirTurno) Ejecutar(args []string) {
-	if len(args) != _PERDIR_TURNO_ARGS {
-		fmt.Printf(Constantes.ENOENT_PARAMS, _PERDIR_TURNO)
+	if !c.VerificarArgumentos(args) {
+		return
 	}
 
 	nombre, especialidad, urgencia := args[0], args[1], args[2]
@@ -34,8 +34,8 @@ func (c PedirTurno) Ejecutar(args []string) {
 }
 
 func (c AtenderPaciente) Ejecutar(args []string) {
-	if len(args) != _ATENDER_SIGUIENTE_ARGS {
-		fmt.Printf(Constantes.ENOENT_PARAMS, _ATENDER_SIGUIENTE)
+	if !c.VerificarArgumentos(args) {
+		return
 	}
 
 	nombre := args[0]
@@ -43,8 +43,8 @@ func (c AtenderPaciente) Ejecutar(args []string) {
 }
 
 func (c InformeDoctores) Ejecutar(args []string) {
-	if len(args) != _INFORME_DOCTOR_ARGS {
-		fmt.Printf(Constantes.ENOENT_PARAMS, _INFORME_DOCTOR)
+	if !c.VerificarArgumentos(args) {
+		return
 	}
 
 	args_ptr := make([]*string, len(args))
@@ -60,6 +60,27 @@ func (c InformeDoctores) Ejecutar(args []string) {
 	Service.InformeDoctores(inicio, fin)
 }
 
+func verificarArgumentos(len_args, esperado int, nombre string) bool {
+	result := len_args == esperado
+	if result {
+		fmt.Printf(Constantes.ENOENT_PARAMS, nombre)
+	}
+	return result
+}
+
+func (c PedirTurno) VerificarArgumentos(args []string) bool {
+	return verificarArgumentos(len(args), _PERDIR_TURNO_ARGS, _PERDIR_TURNO)
+}
+
+func (c AtenderPaciente) VerificarArgumentos(args []string) bool {
+	return verificarArgumentos(len(args), _ATENDER_SIGUIENTE_ARGS, _ATENDER_SIGUIENTE)
+}
+
+func (c InformeDoctores) VerificarArgumentos(args []string) bool {
+	return verificarArgumentos(len(args), _INFORME_DOCTOR_ARGS, _INFORME_DOCTOR)
+}
+
+// Devuelve un diccionario con los comandos posibles en el CLI
 func ObtenerComandos() Dict.Diccionario[string, Comando] {
 	dict := Dict.CrearHash[string, Comando]()
 	dict.Guardar(_PERDIR_TURNO, new(PedirTurno))
