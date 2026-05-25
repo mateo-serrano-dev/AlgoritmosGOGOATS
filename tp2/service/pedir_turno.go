@@ -6,7 +6,7 @@ import (
 	"tp2/database"
 )
 
-func PedirTurno(db *database.Database, nombrePaciente, especialidad, urgencia string, año int) {
+func PedirTurno(db *database.Database, nombrePaciente, especialidad, urgencia string) {
 	hayError := false
 
 	if !db.ExistePaciente(nombrePaciente) {
@@ -23,7 +23,7 @@ func PedirTurno(db *database.Database, nombrePaciente, especialidad, urgencia st
 	}
 
 	if !hayError {
-		db.EncolarTurno(nombrePaciente, año, urgencia, especialidad)
+		db.EncolarTurno(nombrePaciente, urgencia, especialidad)
 		fmt.Printf(constantes.PACIENTE_ENCOLADO, nombrePaciente)
 		fmt.Printf(constantes.CANT_PACIENTES_ENCOLADOS, db.ObtenerCantidadEnEspera(especialidad), especialidad)
 	}

@@ -46,7 +46,7 @@ func (db *Database) agregarDoctor(nombre string, especialidad string) *Modelos.D
 	return d
 }
 
-func (db *Database) EncolarTurno(nombre string, año int, urgencia string, especialidad string) {
+func (db *Database) EncolarTurno(nombre string, urgencia string, especialidad string) {
 	// precondicion: el paciente y la especialidad ya existen en la db
 	p := db.pacientes.Obtener(nombre)
 	e := db.especialidades.Obtener(especialidad)

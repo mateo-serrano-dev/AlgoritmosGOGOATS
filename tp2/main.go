@@ -4,16 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	Comando "tdas/comando"
 	Constantes "tp2/constantes"
 	Database "tp2/database"
+	Parsing "tp2/parsing"
 )
 
-const CANTIDAD_ARGUMENTOS = 3
+const _CANTIDAD_ARGUMENTOS = 3
 
 func main() {
 	db := Database.CrearDatabase()
 
-	if len(os.Args) != CANTIDAD_ARGUMENTOS {
+	if len(os.Args) != _CANTIDAD_ARGUMENTOS {
 		fmt.Printf(Constantes.ENOENT_CANT_PARAMS)
 		return
 	}
@@ -23,11 +25,16 @@ func main() {
 	Database.LeerArchivo(csvPacientes, db, Database.ParsearPaciente)
 	Database.LeerArchivo(csvDoctores, db, Database.ParsearDoctor)
 
+	comandos := Comando.ObtenerComandos()
+
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		line := s.Text()
-		if line == "" {
+		linea := s.Text()
+		if linea == "" {
 			break
 		}
+
+		comando, args := Parsing.ParsearComando(linea, comandos)
+		comando.Ejecutar(args)
 	}
 }

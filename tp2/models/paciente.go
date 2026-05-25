@@ -7,11 +7,6 @@ type Paciente struct {
 	año_inscripcion int
 }
 
-/*type Turno struct {
-	paciente *Paciente
-	urgencia string
-}*/
-
 func CrearPaciente(nombre string, año int) *Paciente {
 	return &Paciente{nombre, año}
 }
@@ -23,10 +18,6 @@ func (p *Paciente) ObtenerInscripcion() int {
 func (p *Paciente) ObtenerAntiguedad() int {
 	return constantes.ANIO_ACTUAL - p.año_inscripcion
 }
-
-/*func (t *Turno) ObtenerUrgencia() string {
-	return t.urgencia
-}*/
 
 func CompararPaciente(a *Paciente, b *Paciente) int {
 	return a.ObtenerAntiguedad() - b.ObtenerAntiguedad()
