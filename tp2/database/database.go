@@ -28,19 +28,19 @@ func (db *Database) ExisteEspecialidad(especialidad string) bool {
 	return db.especialidades.Pertenece(especialidad)
 }
 
-func (db *Database) agregarPaciente(nombre string, año int) *Modelos.Paciente {
+func (db *Database) AgregarPaciente(nombre string, año int) *Modelos.Paciente {
 	p := Modelos.CrearPaciente(nombre, año)
 	db.pacientes.Guardar(nombre, p)
 	return p
 }
 
-func (db *Database) agregarEspecialidad(nombre string) *Modelos.Especialidad {
+func (db *Database) AgregarEspecialidad(nombre string) *Modelos.Especialidad {
 	e := Modelos.CrearEspecialidad()
 	db.especialidades.Guardar(nombre, e)
 	return e
 }
 
-func (db *Database) agregarDoctor(nombre string, especialidad string) *Modelos.Doctor {
+func (db *Database) AgregarDoctor(nombre string, especialidad string) *Modelos.Doctor {
 	d := Modelos.CrearDoctor(nombre, especialidad)
 	db.doctores.Guardar(nombre, d)
 	return d
