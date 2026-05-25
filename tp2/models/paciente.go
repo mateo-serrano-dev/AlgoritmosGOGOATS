@@ -1,15 +1,12 @@
-package logica
+package models
+
+import "tp2/constantes"
 
 type Paciente struct {
 	nombre          string
 	año_inscripcion int
 	urgencia        string
 }
-
-const AÑO_ACTUAL = 2026
-
-const URGENTE = "URGENTE"
-const REGULAR = "REGULAR"
 
 func CrearPaciente(nombre string, año int, urgencia string) *Paciente {
 	return &Paciente{nombre, año, urgencia}
@@ -20,7 +17,7 @@ func (p *Paciente) ObtenerInscripcion() int {
 }
 
 func (p *Paciente) ObtenerAntiguedad() int {
-	return AÑO_ACTUAL - p.año_inscripcion
+	return constantes.ANIO_ACTUAL - p.año_inscripcion
 }
 
 func (p *Paciente) ObtenerUrgencia() string {
