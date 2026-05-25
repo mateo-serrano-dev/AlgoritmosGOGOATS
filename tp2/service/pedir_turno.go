@@ -7,22 +7,24 @@ import (
 )
 
 func PedirTurno(db *database.Database, nombrePaciente, especialidad, urgencia string, año int) {
-	error := false
+	hayError := false
 
 	if !db.ExistePaciente(nombrePaciente) {
-		error = true
+		hayError = true
 		fmt.Printf(constantes.ENOENT_PACIENTE, nombrePaciente)
 	}
 	if !db.ExisteEspecialidad(especialidad) {
-		error = true
+		hayError = true
 		fmt.Printf(constantes.ENOENT_ESPECIALIDAD, especialidad)
 	}
 	if urgencia != constantes.URGENTE && urgencia != constantes.REGULAR {
-		error = true
+		hayError = true
 		fmt.Printf(constantes.ENOENT_URGENCIA, urgencia)
 	}
 
-	if !error {
+	if !hayError {
 		db.EncolarTurno(nombrePaciente, año, urgencia, especialidad)
+		fmt.Printf(constantes.PACIENTE_ENCOLADO, nombrePaciente)
+		fmt.Printf(constantes.CANT_PACIENTES_ENCOLADOS, db.ObtenerCantidadEnEspera(especialidad), especialidad)
 	}
 }

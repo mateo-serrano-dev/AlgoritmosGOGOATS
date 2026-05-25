@@ -38,3 +38,9 @@ func (db *Database) EncolarTurno(nombre string, año int, urgencia string, espec
 
 	e.EnconlarPaciente(p, urgencia)
 }
+
+func (db *Database) ObtenerCantidadEnEspera(especialidad string) int {
+	// precondicion: la especialidad ya existe en la db
+	e := db.especialidades.Obtener(especialidad)
+	return e.CantidadEnEspera()
+}
