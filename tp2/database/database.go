@@ -19,8 +19,8 @@ func (db *Database) ExisteEspecialidad(especialidad string) bool {
 	return db.especialidades.Pertenece(especialidad)
 }
 
-func (db *Database) agregarPaciente(nombre string, año int, urgencia string) *Modelos.Paciente {
-	p := Modelos.CrearPaciente(nombre, año, urgencia)
+func (db *Database) agregarPaciente(nombre string, año int) *Modelos.Paciente {
+	p := Modelos.CrearPaciente(nombre, año)
 	db.pacientes.Guardar(nombre, p)
 	return p
 }
@@ -36,5 +36,5 @@ func (db *Database) EncolarTurno(nombre string, año int, urgencia string, espec
 	p := db.pacientes.Obtener(nombre)
 	e := db.especialidades.Obtener(especialidad)
 
-	e.EnconlarPaciente(p)
+	e.EnconlarPaciente(p, urgencia)
 }
