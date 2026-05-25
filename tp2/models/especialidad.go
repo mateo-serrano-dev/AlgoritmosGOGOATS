@@ -10,6 +10,7 @@ import (
 type Especialidad struct {
 	urgentes   Cola.Cola[*Paciente]
 	noUrgentes ColaPrioridad.ColaPrioridad[*Paciente]
+	cantidad   int
 }
 
 func CrearEspecialidad() *Especialidad {
@@ -42,4 +43,9 @@ func (e *Especialidad) EnconlarPaciente(paciente *Paciente) {
 	} else {
 		e.noUrgentes.Encolar(paciente)
 	}
+	e.cantidad++
+}
+
+func (e *Especialidad) CantidadEnEspera() int {
+	return e.cantidad
 }
