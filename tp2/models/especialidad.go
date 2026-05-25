@@ -37,8 +37,8 @@ func (e *Especialidad) DesencolarPaciente() *Paciente {
 	return p
 }
 
-func (e *Especialidad) EnconlarPaciente(paciente *Paciente) {
-	if paciente.urgencia == constantes.URGENTE {
+func (e *Especialidad) EnconlarPaciente(paciente *Paciente, urgencia string) {
+	if urgencia == constantes.URGENTE {
 		e.urgentes.Encolar(paciente)
 	} else {
 		e.noUrgentes.Encolar(paciente)

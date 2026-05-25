@@ -1,3 +1,5 @@
 package service
 
-func AtenderSiguiente()
+func AtenderSiguiente(nombreDoctor string) {
+
+}
