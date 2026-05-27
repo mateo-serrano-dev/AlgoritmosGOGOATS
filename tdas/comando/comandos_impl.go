@@ -8,14 +8,6 @@ import (
 	Service "tp2/service"
 )
 
-const _PERDIR_TURNO = "PERDIR_TURNO"
-const _ATENDER_SIGUIENTE = "ATENDER_SIGUIENTE"
-const _INFORME_DOCTOR = "INFORME"
-
-const _PERDIR_TURNO_ARGS = 3
-const _ATENDER_SIGUIENTE_ARGS = 1
-const _INFORME_DOCTOR_ARGS = 2
-
 type ComandoBase struct {
 	database *DB.Database
 }
@@ -24,8 +16,8 @@ type PedirTurno struct{ ComandoBase }
 type AtenderPaciente struct{ ComandoBase }
 type InformeDoctores struct{ ComandoBase }
 
-func (c PedirTurno) Ejecutar(args []string) {
-	if !c.VerificarArgumentos(args) {
+func (c *PedirTurno) Ejecutar(args []string) {
+	if !c.cantidadArgumentosCorrecta(args) {
 		return
 	}
 
@@ -33,8 +25,8 @@ func (c PedirTurno) Ejecutar(args []string) {
 	Service.PedirTurno(c.database, nombre, especialidad, urgencia)
 }
 
-func (c AtenderPaciente) Ejecutar(args []string) {
-	if !c.VerificarArgumentos(args) {
+func (c *AtenderPaciente) Ejecutar(args []string) {
+	if !c.cantidadArgumentosCorrecta(args) {
 		return
 	}
 
@@ -42,8 +34,8 @@ func (c AtenderPaciente) Ejecutar(args []string) {
 	Service.AtenderSiguiente(nombre)
 }
 
-func (c InformeDoctores) Ejecutar(args []string) {
-	if !c.VerificarArgumentos(args) {
+func (c *InformeDoctores) Ejecutar(args []string) {
+	if !c.cantidadArgumentosCorrecta(args) {
 		return
 	}
 
@@ -68,23 +60,24 @@ func verificarArgumentos(len_args, esperado int, nombre string) bool {
 	return result
 }
 
-func (c PedirTurno) VerificarArgumentos(args []string) bool {
-	return verificarArgumentos(len(args), _PERDIR_TURNO_ARGS, _PERDIR_TURNO)
+// cantidadArgumentosCorrecta es un método privado que solo se usa internamente para validar rapidamente los args ingresados
+func (c *PedirTurno) cantidadArgumentosCorrecta(args []string) bool {
+	return verificarArgumentos(len(args), Constantes.PEDIR_TURNO_ARGS, Constantes.CMD_PEDIR_TURNO)
 }
 
-func (c AtenderPaciente) VerificarArgumentos(args []string) bool {
-	return verificarArgumentos(len(args), _ATENDER_SIGUIENTE_ARGS, _ATENDER_SIGUIENTE)
+func (c *AtenderPaciente) cantidadArgumentosCorrecta(args []string) bool {
+	return verificarArgumentos(len(args), Constantes.ATENDER_SIGUIENTE_ARGS, Constantes.CMD_ATENDER_SIGUIENTE)
 }
 
-func (c InformeDoctores) VerificarArgumentos(args []string) bool {
-	return verificarArgumentos(len(args), _INFORME_DOCTOR_ARGS, _INFORME_DOCTOR)
+func (c *InformeDoctores) cantidadArgumentosCorrecta(args []string) bool {
+	return verificarArgumentos(len(args), Constantes.INFORME_DOCTOR_ARGS, Constantes.CMD_INFORME_DOCTOR)
 }
 
 // Devuelve un diccionario con los comandos posibles en el CLI
-func ObtenerComandos() Dict.Diccionario[string, Comando] {
+func ObtenerComandos(db *DB.Database) Dict.Diccionario[string, Comando] {
 	dict := Dict.CrearHash[string, Comando]()
-	dict.Guardar(_PERDIR_TURNO, new(PedirTurno))
-	dict.Guardar(_ATENDER_SIGUIENTE, new(AtenderPaciente))
-	dict.Guardar(_INFORME_DOCTOR, new(InformeDoctores))
+	dict.Guardar(Constantes.CMD_PEDIR_TURNO, new(PedirTurno))
+	dict.Guardar(Constantes.CMD_ATENDER_SIGUIENTE, new(AtenderPaciente))
+	dict.Guardar(Constantes.CMD_INFORME_DOCTOR, new(InformeDoctores))
 	return dict
 }

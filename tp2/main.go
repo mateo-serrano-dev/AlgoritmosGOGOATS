@@ -25,7 +25,7 @@ func main() {
 	Database.LeerArchivo(csvPacientes, db, Parsing.ParsearPaciente)
 	Database.LeerArchivo(csvDoctores, db, Parsing.ParsearDoctor)
 
-	comandos := Comando.ObtenerComandos()
+	comandos := Comando.ObtenerComandos(db)
 
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
@@ -34,7 +34,13 @@ func main() {
 			break
 		}
 
-		comando, args := Parsing.ParsearComando(linea, comandos)
+		comando, args, hayError := Parsing.ParsearComando(linea, comandos)
+		if hayError {
+			continue
+		}
 		comando.Ejecutar(args)
+	}
+	if err := s.Err(); err != nil {
+		return
 	}
 }

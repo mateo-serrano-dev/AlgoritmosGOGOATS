@@ -10,15 +10,20 @@ import (
 	DB "tp2/database"
 )
 
-func ParsearComando(linea string, comandos Dict.Diccionario[string, Comando.Comando]) (Comando.Comando, []string) {
+func ParsearComando(linea string, comandos Dict.Diccionario[string, Comando.Comando]) (Comando.Comando, []string, bool) {
 	dividido := strings.Split(linea, ":")
+	if len(dividido) != 2 {
+		fmt.Printf(Constantes.ENOENT_FORMATO, linea)
+		return nil, nil, true
+	}
 	nombre, args := dividido[0], dividido[1]
 
 	if !comandos.Pertenece(nombre) {
 		fmt.Printf(Constantes.ENOENT_CMD, nombre)
+		return nil, nil, true
 	}
 
-	return comandos.Obtener(nombre), strings.Split(args, ",")
+	return comandos.Obtener(nombre), strings.Split(args, ","), false
 }
 
 func ParsearPaciente(linea string, db *DB.Database) {
