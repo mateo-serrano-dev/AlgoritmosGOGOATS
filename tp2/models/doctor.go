@@ -25,3 +25,7 @@ func (d *Doctor) CantidadAtendidos() int {
 func (d *Doctor) ObtenerEspecialidad() string {
 	return d.especialidad
 }
+
+func (d *Doctor) ObtenerNombre() string {
+	return d.nombre
+}

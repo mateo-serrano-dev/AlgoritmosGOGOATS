@@ -70,3 +70,12 @@ func (db *Database) ObtenerPaciente(nombrePaciente string) *Modelos.Paciente {
 	// precondicion: el paciente ya existe en la db
 	return db.pacientes.Obtener(nombrePaciente)
 }
+
+func (db *Database) ObtenerDoctoresPorRango(inicio, fin *string) []*Modelos.Doctor {
+	sliceDoctores := make([]*Modelos.Doctor, 0)
+	for iter := db.doctores.IteradorRango(inicio, fin); iter.HayAlgoMas(); iter.Avanzar() {
+		_, doctor := iter.VerActual()
+		sliceDoctores = append(sliceDoctores, doctor)
+	}
+	return sliceDoctores
+}

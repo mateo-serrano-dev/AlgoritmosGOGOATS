@@ -49,7 +49,7 @@ func (c *InformeDoctores) Ejecutar(args []string) {
 	}
 
 	inicio, fin := args_ptr[0], args_ptr[1]
-	Service.InformeDoctores(inicio, fin)
+	Service.InformeDoctores(c.database, inicio, fin)
 }
 
 func verificarArgumentos(len_args, esperado int, nombre string) bool {
