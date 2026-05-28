@@ -54,7 +54,7 @@ func (c *InformeDoctores) Ejecutar(args []string) {
 
 func verificarArgumentos(len_args, esperado int, nombre string) bool {
 	result := len_args == esperado
-	if result {
+	if !result {
 		fmt.Printf(Constantes.ENOENT_PARAMS, nombre)
 	}
 	return result
@@ -76,8 +76,9 @@ func (c *InformeDoctores) cantidadArgumentosCorrecta(args []string) bool {
 // Devuelve un diccionario con los comandos posibles en el CLI
 func ObtenerComandos(db *DB.Database) Dict.Diccionario[string, Comando] {
 	dict := Dict.CrearHash[string, Comando]()
-	dict.Guardar(Constantes.CMD_PEDIR_TURNO, new(PedirTurno))
-	dict.Guardar(Constantes.CMD_ATENDER_SIGUIENTE, new(AtenderPaciente))
-	dict.Guardar(Constantes.CMD_INFORME_DOCTOR, new(InformeDoctores))
+	comandoBase := &ComandoBase{database: db}
+	dict.Guardar(Constantes.CMD_PEDIR_TURNO, &PedirTurno{*comandoBase})
+	dict.Guardar(Constantes.CMD_ATENDER_SIGUIENTE, &AtenderPaciente{*comandoBase})
+	dict.Guardar(Constantes.CMD_INFORME_DOCTOR, &InformeDoctores{*comandoBase})
 	return dict
 }

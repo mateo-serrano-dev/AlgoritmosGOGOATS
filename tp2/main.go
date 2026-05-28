@@ -20,10 +20,9 @@ func main() {
 		return
 	}
 
-	csvPacientes, csvDoctores := os.Args[1], os.Args[2]
-
-	Database.LeerArchivo(csvPacientes, db, Parsing.ParsearPaciente)
+	csvDoctores, csvPacientes := os.Args[1], os.Args[2]
 	Database.LeerArchivo(csvDoctores, db, Parsing.ParsearDoctor)
+	Database.LeerArchivo(csvPacientes, db, Parsing.ParsearPaciente)
 
 	comandos := Comando.ObtenerComandos(db)
 

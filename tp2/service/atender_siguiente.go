@@ -21,6 +21,8 @@ func AtenderSiguiente(db *database.Database, nombreDoctor string) {
 		return
 	}
 
+	doctor.AumentarAtendidos()
+
 	fmt.Printf(constantes.PACIENTE_ATENDIDO, paciente.ObtenerNombre())
 	fmt.Printf(constantes.CANT_PACIENTES_ENCOLADOS, especialidad.CantidadEnEspera(), doctor.ObtenerEspecialidad())
 }

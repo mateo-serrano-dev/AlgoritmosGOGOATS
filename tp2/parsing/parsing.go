@@ -11,8 +11,9 @@ import (
 )
 
 func ParsearComando(linea string, comandos Dict.Diccionario[string, Comando.Comando]) (Comando.Comando, []string, bool) {
-	dividido := strings.Split(linea, ":")
-	if len(dividido) != 2 {
+	linea = strings.TrimSpace(linea)
+	dividido := strings.SplitN(linea, ":", 2)
+	if len(dividido) < 2 {
 		fmt.Printf(Constantes.ENOENT_FORMATO, linea)
 		return nil, nil, true
 	}
@@ -23,7 +24,14 @@ func ParsearComando(linea string, comandos Dict.Diccionario[string, Comando.Coma
 		return nil, nil, true
 	}
 
-	return comandos.Obtener(nombre), strings.Split(args, ","), false
+	var argsFinales []string
+	if args != "" {
+		argsFinales = strings.Split(args, ",")
+	} else {
+		argsFinales = []string{}
+	}
+
+	return comandos.Obtener(nombre), argsFinales, false
 }
 
 func ParsearPaciente(linea string, db *DB.Database) {

@@ -24,10 +24,12 @@ func (e *Especialidad) DesencolarPaciente() *Paciente {
 	var p *Paciente
 	if !e.urgentes.EstaVacia() {
 		p = e.urgentes.Desencolar()
+	} else if !e.noUrgentes.EstaVacia() {
+		p = e.noUrgentes.Desencolar()
 	}
 
-	if !e.noUrgentes.EstaVacia() {
-		p = e.noUrgentes.Desencolar()
+	if p != nil {
+		e.cantidad--
 	}
 
 	return p
