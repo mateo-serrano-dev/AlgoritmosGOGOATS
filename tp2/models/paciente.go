@@ -19,6 +19,10 @@ func (p *Paciente) ObtenerAntiguedad() int {
 	return constantes.ANIO_ACTUAL - p.año_inscripcion
 }
 
+func (p *Paciente) ObtenerNombre() string {
+	return p.nombre
+}
+
 func CompararPaciente(a *Paciente, b *Paciente) int {
 	return a.ObtenerAntiguedad() - b.ObtenerAntiguedad()
 }

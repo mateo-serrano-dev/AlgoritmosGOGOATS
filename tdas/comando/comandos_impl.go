@@ -31,7 +31,7 @@ func (c *AtenderPaciente) Ejecutar(args []string) {
 	}
 
 	nombre := args[0]
-	Service.AtenderSiguiente(nombre)
+	Service.AtenderSiguiente(c.database, nombre)
 }
 
 func (c *InformeDoctores) Ejecutar(args []string) {
@@ -40,11 +40,11 @@ func (c *InformeDoctores) Ejecutar(args []string) {
 	}
 
 	args_ptr := make([]*string, len(args))
-	for i, arg := range args {
-		if arg == "" {
+	for i, _ := range args {
+		if args[i] == "" {
 			args_ptr[i] = nil
 		} else {
-			args_ptr[i] = &arg
+			args_ptr[i] = &args[i]
 		}
 	}
 

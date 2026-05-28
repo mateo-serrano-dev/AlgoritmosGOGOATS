@@ -20,4 +20,7 @@ func LeerArchivo(ruta string, db *Database, f func(string, *Database)) {
 		linea := s.Text()
 		f(linea, db)
 	}
+	if err := s.Err(); err != nil {
+		return
+	}
 }

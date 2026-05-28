@@ -22,9 +22,14 @@ func PedirTurno(db *database.Database, nombrePaciente, especialidad, urgencia st
 		fmt.Printf(constantes.ENOENT_URGENCIA, urgencia)
 	}
 
-	if !hayError {
-		db.EncolarTurno(nombrePaciente, urgencia, especialidad)
-		fmt.Printf(constantes.PACIENTE_ENCOLADO, nombrePaciente)
-		fmt.Printf(constantes.CANT_PACIENTES_ENCOLADOS, db.ObtenerCantidadEnEspera(especialidad), especialidad)
+	if hayError {
+		return
 	}
+
+	p := db.ObtenerPaciente(nombrePaciente)
+	e := db.ObtenerEspecialidad(especialidad)
+
+	e.EncolarPaciente(p, urgencia)
+	fmt.Printf(constantes.PACIENTE_ENCOLADO, nombrePaciente)
+	fmt.Printf(constantes.CANT_PACIENTES_ENCOLADOS, e.CantidadEnEspera(), especialidad)
 }

@@ -20,6 +20,7 @@ func CrearDatabase() *Database {
 	return db
 }
 
+// ----Validar existencia en la DB----
 func (db *Database) ExistePaciente(nombre string) bool {
 	return db.pacientes.Pertenece(nombre)
 }
@@ -28,6 +29,11 @@ func (db *Database) ExisteEspecialidad(especialidad string) bool {
 	return db.especialidades.Pertenece(especialidad)
 }
 
+func (db *Database) ExisteDoctor(nombreDoctor string) bool {
+	return db.doctores.Pertenece(nombreDoctor)
+}
+
+// ----Guardado de elementos en la DB
 func (db *Database) AgregarPaciente(nombre string, año int) *Modelos.Paciente {
 	p := Modelos.CrearPaciente(nombre, año)
 	db.pacientes.Guardar(nombre, p)
@@ -41,21 +47,26 @@ func (db *Database) AgregarEspecialidad(nombre string) *Modelos.Especialidad {
 }
 
 func (db *Database) AgregarDoctor(nombre string, especialidad string) *Modelos.Doctor {
+	if !db.ExisteEspecialidad(especialidad) {
+		db.AgregarEspecialidad(especialidad)
+	}
 	d := Modelos.CrearDoctor(nombre, especialidad)
 	db.doctores.Guardar(nombre, d)
 	return d
 }
 
-func (db *Database) EncolarTurno(nombre string, urgencia string, especialidad string) {
-	// precondicion: el paciente y la especialidad ya existen en la db
-	p := db.pacientes.Obtener(nombre)
-	e := db.especialidades.Obtener(especialidad)
-
-	e.EnconlarPaciente(p, urgencia)
+// ----Obtener elementos de la DB
+func (db *Database) ObtenerDoctor(nombreDoctor string) *Modelos.Doctor {
+	// precondicion: el doctor ya existe en la db
+	return db.doctores.Obtener(nombreDoctor)
 }
 
-func (db *Database) ObtenerCantidadEnEspera(especialidad string) int {
+func (db *Database) ObtenerEspecialidad(nombreEspecialidad string) *Modelos.Especialidad {
 	// precondicion: la especialidad ya existe en la db
-	e := db.especialidades.Obtener(especialidad)
-	return e.CantidadEnEspera()
+	return db.especialidades.Obtener(nombreEspecialidad)
+}
+
+func (db *Database) ObtenerPaciente(nombrePaciente string) *Modelos.Paciente {
+	// precondicion: el paciente ya existe en la db
+	return db.pacientes.Obtener(nombrePaciente)
 }

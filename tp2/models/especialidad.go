@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	Cola "tdas/cola"
 	ColaPrioridad "tdas/cola_prioridad"
 	"tp2/constantes"
@@ -21,6 +20,7 @@ func CrearEspecialidad() *Especialidad {
 }
 
 func (e *Especialidad) DesencolarPaciente() *Paciente {
+	// puede devolver nil, se maneja ese caso especificamente donde corresponda
 	var p *Paciente
 	if !e.urgentes.EstaVacia() {
 		p = e.urgentes.Desencolar()
@@ -30,14 +30,10 @@ func (e *Especialidad) DesencolarPaciente() *Paciente {
 		p = e.noUrgentes.Desencolar()
 	}
 
-	if p == nil {
-		fmt.Printf(constantes.SIN_PACIENTES)
-	}
-
 	return p
 }
 
-func (e *Especialidad) EnconlarPaciente(paciente *Paciente, urgencia string) {
+func (e *Especialidad) EncolarPaciente(paciente *Paciente, urgencia string) {
 	if urgencia == constantes.URGENTE {
 		e.urgentes.Encolar(paciente)
 	} else {

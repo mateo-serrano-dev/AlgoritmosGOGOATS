@@ -14,10 +14,14 @@ func CrearDoctor(nombre, especialidad string) *Doctor {
 	}
 }
 
-func (d *Doctor) AtenderPaciente() {
+func (d *Doctor) AumentarAtendidos() {
 	d.atendidos++
 }
 
 func (d *Doctor) CantidadAtendidos() int {
 	return d.atendidos
+}
+
+func (d *Doctor) ObtenerEspecialidad() string {
+	return d.especialidad
 }
