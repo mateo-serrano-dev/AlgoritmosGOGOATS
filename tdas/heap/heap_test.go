@@ -2,6 +2,7 @@ package heap_test
 
 import (
 	"cmp"
+	"math/rand"
 	"strings"
 	TDAHeap "tdas/heap"
 	"testing"
@@ -139,8 +140,9 @@ func TestCrearHeapArr(t *testing.T) {
 func TestHeapVolumen(t *testing.T) {
 	heap := TDAHeap.CrearHeap[int](cmp.Compare)
 	cantidadElementos := 10000
-	for i := range cantidadElementos {
-		heap.Encolar((i * 7) % cantidadElementos)
+	elemDesordenados := rand.Perm(cantidadElementos)
+	for _, elem := range elemDesordenados {
+		heap.Encolar(elem)
 	}
 	require.EqualValues(t, cantidadElementos, heap.Cantidad())
 
@@ -236,16 +238,15 @@ func TestHeapSortArregloYaOrdenado(t *testing.T) {
 }
 
 func TestHeapSortVolumen(t *testing.T) {
-	cantidadElementos := 5000
-	arr := make([]int, cantidadElementos)
+	t.Log("Probamos que HeapSort ordene correctamente un volumen grande de elementos desordenados")
 
-	for i := range cantidadElementos {
-		arr[i] = (i * 7) % cantidadElementos
-	}
+	const CANTIDAD_ELEMENTOS = 5000
 
-	TDAHeap.HeapSort[int](arr, cmp.Compare)
+	arr := rand.Perm(CANTIDAD_ELEMENTOS)
 
-	for j := range cantidadElementos - 1 {
+	TDAHeap.HeapSort[int](arr, cmp.Compare[int])
+
+	for j := range CANTIDAD_ELEMENTOS - 1 {
 		require.True(t, arr[j] <= arr[j+1])
 	}
 }

@@ -2,9 +2,6 @@ package diccionario
 
 import TDAPila "tdas/pila"
 
-const _ERR_NO_PERTENECE string = "La clave no pertenece al diccionario"
-const _ERROR_ITER_TERMINO string = "El iterador termino de iterar"
-
 type nodoAb[K comparable, V any] struct {
 	izq   *nodoAb[K, V]
 	der   *nodoAb[K, V]
@@ -88,49 +85,50 @@ func (abb *arbolBinarioBusqueda[K, V]) Cantidad() int {
 	return abb.cantidad
 }
 
-func (abb *arbolBinarioBusqueda[K, V]) buscarMinimo(nodoActual, padre *nodoAb[K, V]) (*nodoAb[K, V], *nodoAb[K, V]) {
+func (abb *arbolBinarioBusqueda[K, V]) buscarMinimo(nodoActual *nodoAb[K, V]) *nodoAb[K, V] {
 	for nodoActual.izq != nil {
-		padre = nodoActual
 		nodoActual = nodoActual.izq
 	}
-	return padre, nodoActual
+	return nodoActual
 }
 
-func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
-	padre, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
-	if hijo == nil {
+func (abb *arbolBinarioBusqueda[K, V]) borrar(nodo *nodoAb[K, V], clave K) (*nodoAb[K, V], V) {
+	if nodo == nil {
 		panic(_ERR_NO_PERTENECE)
 	}
 
-	borrado := hijo.valor
-
-	// caso 2 hijos
-	if hijo.der != nil && hijo.izq != nil {
-		_, sucesor := abb.buscarMinimo(hijo.der, hijo)
-		k := sucesor.clave
-		v := abb.Borrar(k)
-		hijo.clave = k
-		hijo.valor = v
-		return borrado
+	comp := abb.comparar(nodo.clave, clave)
+	var dato V
+	if comp < 0 {
+		nodo.der, dato = abb.borrar(nodo.der, clave)
+		return nodo, dato
+	} else if comp > 0 {
+		nodo.izq, dato = abb.borrar(nodo.izq, clave)
+		return nodo, dato
 	}
 
-	// casos de 0 o 1 hijo
-	var reemplazo *nodoAb[K, V]
-	if hijo.izq == nil {
-		reemplazo = hijo.der
-	} else {
-		reemplazo = hijo.izq
+	borrado := nodo.valor
+
+	if nodo.izq == nil {
+		abb.cantidad--
+		return nodo.der, borrado
+	}
+	if nodo.der == nil {
+		abb.cantidad--
+		return nodo.izq, borrado
 	}
 
-	if padre == nil {
-		abb.raiz = reemplazo
-	} else if padre.izq == hijo {
-		padre.izq = reemplazo
-	} else {
-		padre.der = reemplazo
-	}
-	abb.cantidad--
-	return borrado
+	sucesor := abb.buscarMinimo(nodo.der)
+	nodo.clave, nodo.valor = sucesor.clave, sucesor.valor
+	nodo.der, _ = abb.borrar(nodo.der, sucesor.clave)
+
+	return nodo, borrado
+}
+
+func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
+	nuevaRaiz, dato := abb.borrar(abb.raiz, clave)
+	abb.raiz = nuevaRaiz
+	return dato
 }
 
 // --- Comparacion ---
@@ -199,7 +197,7 @@ func (abb *arbolBinarioBusqueda[K, V]) apilarMenoresyActual(nodoActual *nodoAb[K
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) Avanzar() {
 	if !iter.HayAlgoMas() {
-		panic(_ERROR_ITER_TERMINO)
+		panic(_ERR_ITER_TERMINO)
 	}
 	nodo := iter.pila.Desapilar().der
 	iter.abb.apilarMenoresyActual(nodo, iter.desde, iter.hasta, iter.pila)
@@ -211,7 +209,7 @@ func (iter *iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
 	if !iter.HayAlgoMas() {
-		panic(_ERROR_ITER_TERMINO)
+		panic(_ERR_ITER_TERMINO)
 	}
 	return iter.pila.VerTope().clave, iter.pila.VerTope().valor
 }
