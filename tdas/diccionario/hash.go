@@ -5,16 +5,6 @@ import (
 	TDALista "tdas/lista"
 )
 
-const _HASHING_INICIAL uint = 14695981039346656037
-const _HASHING_MULTIPLIER uint = 1099511628211
-const _TAMAÑO_INICIAL int = 16
-const _NOT_ON_HASHMAP string = "La clave no pertenece al diccionario"
-const _ERR_ITER_TERMINO string = "El iterador termino de iterar"
-
-const _TECHO_CARGA float64 = 3
-const _PISO_CARGA float64 = 0.25
-const _PROPORCION_REDIMENSION int = 2
-
 type hashMapAbierto[K comparable, V any] struct {
 	datos    []TDALista.Lista[*claveValor[K, V]]
 	cantidad int
@@ -43,7 +33,6 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 }
 
 func (h *hashMapAbierto[K, V]) Guardar(clave K, dato V) {
-	h.verificarRedimension()
 	par := h.buscarClaveValor(clave)
 
 	if par != nil {
@@ -54,6 +43,10 @@ func (h *hashMapAbierto[K, V]) Guardar(clave K, dato V) {
 	par = crearClaveValor(clave, dato)
 	h.colocarValor(par, h.datos)
 	h.cantidad++ //Solo si no pisa el valor
+
+	if h.obtenerFactorCarga() >= _TECHO_CARGA {
+		h.redimensionar(len(h.datos) * _PROPORCION_REDIMENSION)
+	}
 }
 
 func (h *hashMapAbierto[K, V]) Pertenece(clave K) bool {
@@ -63,19 +56,18 @@ func (h *hashMapAbierto[K, V]) Pertenece(clave K) bool {
 func (h *hashMapAbierto[K, V]) Obtener(clave K) V {
 	par := h.buscarClaveValor(clave)
 	if par == nil {
-		panic(_NOT_ON_HASHMAP)
+		panic(_ERR_NO_PERTENECE)
 	}
 
 	return par.valor
 }
 
 func (h *hashMapAbierto[K, V]) Borrar(clave K) V {
-	h.verificarRedimension()
 	i := fnvHashing(clave, len(h.datos))
 	lista := h.datos[i]
 
 	if lista == nil {
-		panic(_NOT_ON_HASHMAP)
+		panic(_ERR_NO_PERTENECE)
 	}
 
 	for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
@@ -87,11 +79,14 @@ func (h *hashMapAbierto[K, V]) Borrar(clave K) V {
 			if lista.EstaVacia() {
 				h.datos[i] = nil
 			}
+			if h.obtenerFactorCarga() <= _PISO_CARGA && len(h.datos) > _TAMAÑO_INICIAL {
+				h.redimensionar(len(h.datos) / _PROPORCION_REDIMENSION)
+			}
 			return dato
 		}
 	}
 
-	panic(_NOT_ON_HASHMAP)
+	panic(_ERR_NO_PERTENECE)
 }
 
 func (h *hashMapAbierto[K, V]) Cantidad() int {
@@ -104,7 +99,7 @@ func fnvHashing[K comparable](clave K, largo int) uint {
 	bytes := convertirABytes(clave)
 	for _, b := range bytes {
 		h ^= uint(b) //Potenciando antes de multiplicar se obtiene una mejor distribucion
-		h *= _HASHING_MULTIPLIER
+		h *= _HASHING_MULTIPLICADOR
 	}
 	return h % uint(largo)
 }
@@ -134,18 +129,6 @@ func (h *hashMapAbierto[K, V]) redimensionar(nuevo_largo int) {
 	}
 
 	h.datos = nuevaTabla
-}
-
-func (h *hashMapAbierto[K, V]) verificarRedimension() {
-	factor := h.obtenerFactorCarga()
-
-	if factor >= _TECHO_CARGA {
-		h.redimensionar(len(h.datos) * _PROPORCION_REDIMENSION)
-	}
-
-	if factor <= _PISO_CARGA && len(h.datos) > _TAMAÑO_INICIAL {
-		h.redimensionar(len(h.datos) / _PROPORCION_REDIMENSION)
-	}
 }
 
 // ----Patrones reutilizables----
