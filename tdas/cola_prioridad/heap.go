@@ -22,9 +22,9 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-	nuevoArreglo := make([]T, max(len(arreglo), _TAMAÑO_INICIAL))
+	nuevoArreglo := make([]T, len(arreglo))
 	copy(nuevoArreglo, arreglo)
-	heap := heap[T]{nuevoArreglo, funcion_cmp, len(arreglo)}
+	heap := heap[T]{nuevoArreglo, funcion_cmp, len(nuevoArreglo)}
 	heap.heapify()
 	return &heap
 }
@@ -72,41 +72,39 @@ func (h *heap[T]) Cantidad() int {
 // --- Acciones internas ---
 
 func (h *heap[T]) upheap(i int) {
-	for true {
+	for i > 0 {
 		padre := padre(i)
-		if h.comparar(h.arr[i], h.arr[padre]) > 0 {
-			h.swap(&h.arr[i], &h.arr[padre])
-			i = padre
-		} else {
-			return
+		if h.comparar(h.arr[i], h.arr[padre]) <= 0 {
+			break
 		}
+		h.swap(&h.arr[i], &h.arr[padre])
+		i = padre
 	}
 }
 
 func (h *heap[T]) downheap(i int) {
-	for true {
-		izq := izq(i)
-		der := der(i)
-		mayor := i
+	for posIzq := izq(i); posIzq < h.cantidad; posIzq = izq(i) {
+		posDer := der(i)
+		mayor := posIzq
 
-		if izq < h.cantidad && h.comparar(h.arr[izq], h.arr[mayor]) > 0 {
-			mayor = izq
+		if posDer < h.cantidad && h.comparar(h.arr[posDer], h.arr[posIzq]) > 0 {
+			mayor = posDer
 		}
 
-		if der < h.cantidad && h.comparar(h.arr[der], h.arr[mayor]) > 0 {
-			mayor = der
-		}
-
-		if mayor != i {
-			h.swap(&h.arr[i], &h.arr[mayor])
-			i = mayor
-		} else {
+		if h.comparar(h.arr[mayor], h.arr[i]) <= 0 {
 			break
 		}
+
+		h.swap(&h.arr[i], &h.arr[mayor])
+
+		i = mayor
 	}
 }
 
 func (h *heap[T]) redimensionar(nuevaCapacidad int) {
+	if nuevaCapacidad == 0 {
+		nuevaCapacidad = _TAMAÑO_INICIAL
+	}
 	nuevoArreglo := make([]T, nuevaCapacidad)
 	copy(nuevoArreglo, h.arr)
 	h.arr = nuevoArreglo
