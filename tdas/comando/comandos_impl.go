@@ -39,16 +39,16 @@ func (c *InformeDoctores) Ejecutar(args []string) {
 		return
 	}
 
-	args_ptr := make([]*string, len(args))
-	for i, _ := range args {
+	argsPuntero := make([]*string, len(args))
+	for i := range args {
 		if args[i] == "" {
-			args_ptr[i] = nil
+			argsPuntero[i] = nil
 		} else {
-			args_ptr[i] = &args[i]
+			argsPuntero[i] = &args[i]
 		}
 	}
 
-	inicio, fin := args_ptr[0], args_ptr[1]
+	inicio, fin := argsPuntero[0], argsPuntero[1]
 	Service.InformeDoctores(c.database, inicio, fin)
 }
 
