@@ -10,6 +10,7 @@ import (
 	DB "tp2/database"
 )
 
+// Devuelve el comando a ejecutar, un array de strings para sus argumentos e indica con un bool si se produjo un error.
 func ParsearComando(linea string, comandos Dict.Diccionario[string, Comando.Comando]) (Comando.Comando, []string, bool) {
 	linea = strings.TrimSpace(linea)
 	dividido := strings.SplitN(linea, ":", 2)
