@@ -2,6 +2,7 @@ package diccionario_test
 
 import (
 	"cmp"
+	"math/rand"
 	"strings"
 	TDADiccionario "tdas/diccionario"
 	"testing"
@@ -26,13 +27,13 @@ func TestDiccionarioOrdClaveDefault(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[string, string](strings.Compare)
 	require.False(t, dic.Pertenece(""))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("") })
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar("") })
+	require.PanicsWithValue(t, _ERR_NO_PERTENECE, func() { dic.Obtener("") })
+	require.PanicsWithValue(t, _ERR_NO_PERTENECE, func() { dic.Borrar("") })
 
 	dicNum := TDADiccionario.CrearABB[int, string](cmp.Compare)
 	require.False(t, dicNum.Pertenece(0))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dicNum.Obtener(0) })
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dicNum.Borrar(0) })
+	require.PanicsWithValue(t, _ERR_NO_PERTENECE, func() { dicNum.Obtener(0) })
+	require.PanicsWithValue(t, _ERR_NO_PERTENECE, func() { dicNum.Borrar(0) })
 }
 
 func TestUnElementOrd(t *testing.T) {
@@ -43,7 +44,7 @@ func TestUnElementOrd(t *testing.T) {
 	require.True(t, dic.Pertenece("A"))
 	require.False(t, dic.Pertenece("B"))
 	require.EqualValues(t, 10, dic.Obtener("A"))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("B") })
+	require.PanicsWithValue(t, _ERR_NO_PERTENECE, func() { dic.Obtener("B") })
 }
 
 func TestDiccionarioOrdGuardar(t *testing.T) {
@@ -254,6 +255,34 @@ func TestValorNuloOrd(t *testing.T) {
 	require.EqualValues(t, (*int)(nil), dic.Obtener(clave))
 	require.EqualValues(t, (*int)(nil), dic.Borrar(clave))
 	require.False(t, dic.Pertenece(clave))
+}
+
+func TestDiccOrdenadoVolumen(t *testing.T) {
+	t.Log("Probamos que al guardar y borrar muchos elementos desordenados el diccionario se comporte correctamente")
+
+	const TAMAÑO int = 10000
+
+	dic := TDADiccionario.CrearABB[int, int](cmp.Compare[int])
+	clavesDesordenadas := rand.Perm(TAMAÑO)
+	for _, clave := range clavesDesordenadas {
+		require.False(t, dic.Pertenece(clave))
+		dic.Guardar(clave, clave)
+		require.True(t, dic.Pertenece(clave))
+	}
+	require.EqualValues(t, TAMAÑO, dic.Cantidad())
+
+	for _, clave := range clavesDesordenadas {
+		require.True(t, dic.Pertenece(clave))
+		require.EqualValues(t, clave, dic.Obtener(clave))
+	}
+
+	for i, clave := range clavesDesordenadas {
+		require.True(t, dic.Pertenece(clave))
+		require.EqualValues(t, clave, dic.Borrar(clave))
+		require.False(t, dic.Pertenece(clave))
+		require.EqualValues(t, TAMAÑO-i-1, dic.Cantidad())
+	}
+	require.Equal(t, 0, dic.Cantidad())
 }
 
 func TestIteradorInternoClavesOrdenadas(t *testing.T) {

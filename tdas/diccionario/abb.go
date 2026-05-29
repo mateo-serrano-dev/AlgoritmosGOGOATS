@@ -2,9 +2,6 @@ package diccionario
 
 import TDAPila "tdas/pila"
 
-const _ERR_NO_PERTENECE string = "La clave no pertenece al diccionario"
-const _ERROR_ITER_TERMINO string = "El iterador termino de iterar"
-
 type nodoAb[K comparable, V any] struct {
 	izq   *nodoAb[K, V]
 	der   *nodoAb[K, V]
@@ -96,6 +93,23 @@ func (abb *arbolBinarioBusqueda[K, V]) buscarMinimo(nodoActual, padre *nodoAb[K,
 	return padre, nodoActual
 }
 
+func (abb *arbolBinarioBusqueda[K, V]) reemplazarNodo(padre, hijo *nodoAb[K, V]) {
+	var reemplazo *nodoAb[K, V]
+	if hijo.izq != nil {
+		reemplazo = hijo.izq
+	} else {
+		reemplazo = hijo.der
+	}
+
+	if padre == nil {
+		abb.raiz = reemplazo
+	} else if padre.izq == hijo {
+		padre.izq = reemplazo
+	} else {
+		padre.der = reemplazo
+	}
+}
+
 func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
 	padre, hijo := abb.buscarPorClave(abb.raiz, nil, clave)
 	if hijo == nil {
@@ -114,21 +128,9 @@ func (abb *arbolBinarioBusqueda[K, V]) Borrar(clave K) V {
 		return borrado
 	}
 
-	// casos de 0 o 1 hijo
-	var reemplazo *nodoAb[K, V]
-	if hijo.izq == nil {
-		reemplazo = hijo.der
-	} else {
-		reemplazo = hijo.izq
-	}
+	// caso 0 o 1 hijo
+	abb.reemplazarNodo(padre, hijo)
 
-	if padre == nil {
-		abb.raiz = reemplazo
-	} else if padre.izq == hijo {
-		padre.izq = reemplazo
-	} else {
-		padre.der = reemplazo
-	}
 	abb.cantidad--
 	return borrado
 }
@@ -199,7 +201,7 @@ func (abb *arbolBinarioBusqueda[K, V]) apilarMenoresyActual(nodoActual *nodoAb[K
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) Avanzar() {
 	if !iter.HayAlgoMas() {
-		panic(_ERROR_ITER_TERMINO)
+		panic(_ERR_ITER_TERMINO)
 	}
 	nodo := iter.pila.Desapilar().der
 	iter.abb.apilarMenoresyActual(nodo, iter.desde, iter.hasta, iter.pila)
@@ -211,7 +213,7 @@ func (iter *iteradorDiccionarioOrdenado[K, V]) HayAlgoMas() bool {
 
 func (iter *iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
 	if !iter.HayAlgoMas() {
-		panic(_ERROR_ITER_TERMINO)
+		panic(_ERR_ITER_TERMINO)
 	}
 	return iter.pila.VerTope().clave, iter.pila.VerTope().valor
 }
