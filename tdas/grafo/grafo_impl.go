@@ -2,82 +2,82 @@ package grafo
 
 import TDADict "tdas/diccionario"
 
-type grafoImp[T any] struct {
-	nodos    TDADict.Diccionario[Nodo[T], TDADict.Diccionario[Nodo[T], int]]
+type grafoImp[T comparable] struct {
+	nodos    TDADict.Diccionario[T, TDADict.Diccionario[T, int]]
 	dirigido bool
 }
 
-func CrearGrafo[T any](dirigido, pesado bool) Grafo[T] {
-	nodos := TDADict.CrearHash[Nodo[T], TDADict.Diccionario[Nodo[T], int]]()
+func CrearGrafoPesado[T comparable](dirigido bool) GrafoPesado[T] {
+	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, int]]()
 	g := grafoImp[T]{nodos, dirigido}
-	if pesado {
-		return &grafoPesadoImp[T]{g}
-	} else {
-		return &grafoNoPesadoImp[T]{g}
-	}
+	return &grafoPesadoImp[T]{g}
+}
+
+func CrearGrafoNoPesado[T comparable](dirigido bool) GrafoNoPesado[T] {
+	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, int]]()
+	g := grafoImp[T]{nodos, dirigido}
+	return &grafoNoPesadoImp[T]{g}
 }
 
 func (g *grafoImp[T]) AgregarVertice(dato T) {
-	nodo := nodoImp[T]{dato}
-	vecinos := TDADict.CrearHash[Nodo[T], int]()
-	g.nodos.Guardar(nodo, vecinos)
+	vecinos := TDADict.CrearHash[T, int]()
+	g.nodos.Guardar(dato, vecinos)
 }
 
-func (g *grafoImp[T]) BorrarVertice(nodo Nodo[T]) {
-	g.nodos.Borrar(nodo)
+func (g *grafoImp[T]) BorrarVertice(dato T) {
+	g.nodos.Borrar(dato)
 	for iter := g.nodos.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
 		_, vecinos := iter.VerActual()
-		vecinos.Borrar(nodo)
+		vecinos.Borrar(dato)
 	}
 }
 
-func (g *grafoImp[T]) BorrarArista(desde, hasta Nodo[T]) {
+func (g *grafoImp[T]) BorrarArista(desde, hasta T) {
 	g.nodos.Obtener(desde).Borrar(hasta)
 	if !g.dirigido {
 		g.nodos.Obtener(hasta).Borrar(desde)
 	}
 }
 
+func (g *grafoImp[T]) CantidadVertices() int {
+	return g.nodos.Cantidad()
+}
+
+func (g *grafoImp[T]) CantidadAristas(dato T) int {
+	return g.nodos.Obtener(dato).Cantidad()
+}
+
 // --- Pesado o No Pesado ---
-type grafoPesadoImp[T any] struct {
+type grafoPesadoImp[T comparable] struct {
 	grafoImp[T]
 }
 
-type grafoNoPesadoImp[T any] struct {
+type grafoNoPesadoImp[T comparable] struct {
 	grafoImp[T]
 }
 
-func (g *grafoImp[T]) agregarArista(desde, hasta Nodo[T], peso int) {
+func (g *grafoImp[T]) agregarArista(desde, hasta T, peso int) {
 	g.nodos.Obtener(desde).Guardar(hasta, peso)
 	if !g.dirigido {
 		g.nodos.Obtener(desde).Guardar(hasta, peso)
 	}
 }
 
-func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta Nodo[T], peso int) {
+func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta T, peso int) {
 	g.agregarArista(desde, hasta, peso)
 }
 
-func (g *grafoPesadoImp[T]) Peso(desde, hasta Nodo[T]) int {
+func (g *grafoPesadoImp[T]) Peso(desde, hasta T) int {
 	return g.nodos.Obtener(desde).Obtener(hasta)
 }
 
-func (g *grafoNoPesadoImp[T]) AgregarArista(desde, hasta Nodo[T]) {
+func (g *grafoNoPesadoImp[T]) AgregarArista(desde, hasta T) {
 	g.agregarArista(desde, hasta, 1)
 }
 
-// --- Nodo ---
-type nodoImp[T any] struct {
-	dato T
-}
-
-func (n nodoImp[T]) Dato() T {
-	return n.dato
-}
-
 // --- Iterador Vertices ---
-type iteradorVertices[T any] struct {
-	iter TDADict.IterDiccionario[Nodo[T], TDADict.Diccionario[Nodo[T], int]]
+type iteradorVertices[T comparable] struct {
+	iter TDADict.IterDiccionario[T, TDADict.Diccionario[T, int]]
 }
 
 func (g *grafoImp[T]) IterVertices() IteradorVertices[T] {
@@ -94,17 +94,17 @@ func (i *iteradorVertices[T]) Avanzar() {
 	i.iter.Avanzar()
 }
 
-func (i *iteradorVertices[T]) VerActual() Nodo[T] {
+func (i *iteradorVertices[T]) VerActual() T {
 	nodo, _ := i.iter.VerActual()
 	return nodo
 }
 
 // --- Iterador adyacentes ---
-type iteradorAdyacentes[T any] struct {
-	iter TDADict.IterDiccionario[Nodo[T], int]
+type iteradorAdyacentes[T comparable] struct {
+	iter TDADict.IterDiccionario[T, int]
 }
 
-func (g *grafoImp[T]) IterAdyacentes(nodo Nodo[T]) IteradorVertices[T] {
+func (g *grafoImp[T]) IterAdyacentes(nodo T) IteradorVertices[T] {
 	i := new(iteradorAdyacentes[T])
 	i.iter = g.nodos.Obtener(nodo).Iterador()
 	return i
@@ -118,7 +118,7 @@ func (i *iteradorAdyacentes[T]) Avanzar() {
 	i.iter.Avanzar()
 }
 
-func (i *iteradorAdyacentes[T]) VerActual() Nodo[T] {
+func (i *iteradorAdyacentes[T]) VerActual() T {
 	nodo, _ := i.iter.VerActual()
 	return nodo
 }

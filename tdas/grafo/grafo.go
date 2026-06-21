@@ -1,32 +1,30 @@
 package grafo
 
-type Grafo[T any] interface {
+type Grafo[T comparable] interface {
 	AgregarVertice(T)
-	BorrarVertice(Nodo[T])
-	BorrarArista(Nodo[T], Nodo[T])
+	BorrarVertice(T)
+	BorrarArista(T, T)
+	CantidadVertices() int
+	CantidadAristas(T) int
 
 	IterVertices() IteradorVertices[T]
-	IterAdyacentes(Nodo[T]) IteradorVertices[T]
+	IterAdyacentes(T) IteradorVertices[T]
 }
 
-type GrafoPesado[T any] interface {
+type GrafoPesado[T comparable] interface {
 	Grafo[T]
 
-	AgregarArista(Nodo[T], Nodo[T], int)
-	Peso(Nodo[T], Nodo[T]) int
+	AgregarArista(T, T, int)
+	Peso(T, T) int
 }
 
-type GrafoNoPesado[T any] interface {
+type GrafoNoPesado[T comparable] interface {
 	Grafo[T]
-	AgregarArista(Nodo[T], Nodo[T])
+	AgregarArista(T, T)
 }
 
-type Nodo[T any] interface {
-	Dato() T
-}
-
-type IteradorVertices[T any] interface {
+type IteradorVertices[T comparable] interface {
 	Avanzar()
-	VerActual() Nodo[T]
+	VerActual() T
 	HayAlgoMas() bool
 }
