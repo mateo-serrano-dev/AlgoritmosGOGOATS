@@ -12,7 +12,7 @@ import (
 	Models "tp3/models"
 )
 
-func ImportarPajek(ruta string, db DB.Database) {
+func ImportarPajek(ruta string, db *DB.Database) {
 	resultado := TDAGrafo.CrearGrafoPesado[Models.Ciudad](false)
 
 	archivo, err := os.Open(ruta)
@@ -119,7 +119,7 @@ func parsearFloat(s string) float64 {
 	return resultado
 }
 
-func parsearVertice(g TDAGrafo.Grafo[Models.Ciudad], linea string, db DB.Database) {
+func parsearVertice(g TDAGrafo.Grafo[Models.Ciudad], linea string, db *DB.Database) {
 	linea = strings.TrimSpace(linea)
 	dividido := strings.Split(linea, ",")
 
@@ -136,7 +136,7 @@ func parsearVertice(g TDAGrafo.Grafo[Models.Ciudad], linea string, db DB.Databas
 	db.RegistrarCiudad(nombre, ciudad)
 }
 
-func parsearArista(g TDAGrafo.GrafoPesado[Models.Ciudad], linea string, db DB.Database) {
+func parsearArista(g TDAGrafo.GrafoPesado[Models.Ciudad], linea string, db *DB.Database) {
 	linea = strings.TrimSpace(linea)
 	dividido := strings.Split(linea, ",")
 

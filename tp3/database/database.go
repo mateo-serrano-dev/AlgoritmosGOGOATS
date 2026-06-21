@@ -11,6 +11,13 @@ type Database struct {
 	grafo    TDAGrafo.Grafo[Models.Ciudad]
 }
 
+func CrearDatabase() *Database {
+	ciudades := TDADict.CrearHash[string, Models.Ciudad]()
+	db := new(Database)
+	db.ciudades = ciudades
+	return db
+}
+
 func (db *Database) RegistrarCiudad(nombre string, ciudad Models.Ciudad) {
 	db.ciudades.Guardar(nombre, ciudad)
 }
