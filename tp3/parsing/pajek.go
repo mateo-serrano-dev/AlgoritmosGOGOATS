@@ -12,13 +12,13 @@ import (
 	Models "tp3/models"
 )
 
-func ImportarPajek(ruta string, db DB.Database) TDAGrafo.Grafo[Models.Ciudad] {
+func ImportarPajek(ruta string, db DB.Database) {
 	resultado := TDAGrafo.CrearGrafoPesado[Models.Ciudad](false)
 
 	archivo, err := os.Open(ruta)
 	if err != nil {
 		fmt.Printf(Constantes.NO_EXISTE_ARCHIVO, ruta)
-		return nil
+		return
 	}
 	defer archivo.Close()
 
@@ -40,10 +40,10 @@ func ImportarPajek(ruta string, db DB.Database) TDAGrafo.Grafo[Models.Ciudad] {
 	}
 
 	if err = s.Err(); err != nil {
-		return nil
+		panic(Constantes.ARCHIVO_PAJEK_ERR)
 	}
 
-	return resultado
+	db.CargarGrafo(resultado)
 }
 
 func ExportarPajek(ruta string, g TDAGrafo.GrafoPesado[Models.Ciudad]) {
