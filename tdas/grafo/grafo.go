@@ -14,8 +14,8 @@ type Grafo[T comparable] interface {
 type GrafoPesado[T comparable] interface {
 	Grafo[T]
 
-	AgregarArista(T, T, int)
-	Peso(T, T) int
+	AgregarArista(T, T, float64)
+	Peso(T, T) float64
 }
 
 type GrafoNoPesado[T comparable] interface {
