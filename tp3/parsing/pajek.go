@@ -72,7 +72,7 @@ func ExportarPajek(ruta string, g TDAGrafo.GrafoPesado[Models.Ciudad]) {
 		aristas += g.CantidadAristas(ciudad)
 		for subIter := g.IterAdyacentes(ciudad); iter.HayAlgoMas(); iter.VerActual() {
 			destino := subIter.VerActual()
-			arista := fmt.Sprintf("%s,%s,%d\n", ciudad.Nombre(), destino.Nombre(), g.Peso(ciudad, destino))
+			arista := fmt.Sprintf("%s,%s,%f\n", ciudad.Nombre(), destino.Nombre(), g.Peso(ciudad, destino))
 			lineas = append(lineas, arista)
 		}
 	}
@@ -101,14 +101,6 @@ func proximoNumero(s *bufio.Scanner) int {
 	}
 
 	return res
-}
-
-func parsearInt(s string) int {
-	resultado, err := strconv.Atoi(s)
-	if err != nil {
-		panic(Constantes.ARCHIVO_PAJEK_ERR)
-	}
-	return resultado
 }
 
 func parsearFloat(s string) float64 {
@@ -144,5 +136,5 @@ func parsearArista(g TDAGrafo.GrafoPesado[Models.Ciudad], linea string, db *DB.D
 		panic(Constantes.ARCHIVO_PAJEK_ERR)
 	}
 	ciudad1, ciudad2, distancia := dividido[0], dividido[1], dividido[2]
-	g.AgregarArista(db.ObtenerCiudad(ciudad1), db.ObtenerCiudad(ciudad2), parsearInt(distancia))
+	g.AgregarArista(db.ObtenerCiudad(ciudad1), db.ObtenerCiudad(ciudad2), parsearFloat(distancia))
 }
