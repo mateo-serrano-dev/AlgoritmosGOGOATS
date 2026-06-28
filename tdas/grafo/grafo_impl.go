@@ -3,24 +3,24 @@ package grafo
 import TDADict "tdas/diccionario"
 
 type grafoImp[T comparable] struct {
-	nodos    TDADict.Diccionario[T, TDADict.Diccionario[T, int]]
+	nodos    TDADict.Diccionario[T, TDADict.Diccionario[T, float64]]
 	dirigido bool
 }
 
 func CrearGrafoPesado[T comparable](dirigido bool) GrafoPesado[T] {
-	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, int]]()
+	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, float64]]()
 	g := grafoImp[T]{nodos, dirigido}
 	return &grafoPesadoImp[T]{g}
 }
 
 func CrearGrafoNoPesado[T comparable](dirigido bool) GrafoNoPesado[T] {
-	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, int]]()
+	nodos := TDADict.CrearHash[T, TDADict.Diccionario[T, float64]]()
 	g := grafoImp[T]{nodos, dirigido}
 	return &grafoNoPesadoImp[T]{g}
 }
 
 func (g *grafoImp[T]) AgregarVertice(dato T) {
-	vecinos := TDADict.CrearHash[T, int]()
+	vecinos := TDADict.CrearHash[T, float64]()
 	g.nodos.Guardar(dato, vecinos)
 }
 
@@ -56,18 +56,18 @@ type grafoNoPesadoImp[T comparable] struct {
 	grafoImp[T]
 }
 
-func (g *grafoImp[T]) agregarArista(desde, hasta T, peso int) {
+func (g *grafoImp[T]) agregarArista(desde, hasta T, peso float64) {
 	g.nodos.Obtener(desde).Guardar(hasta, peso)
 	if !g.dirigido {
 		g.nodos.Obtener(desde).Guardar(hasta, peso)
 	}
 }
 
-func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta T, peso int) {
+func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta T, peso float64) {
 	g.agregarArista(desde, hasta, peso)
 }
 
-func (g *grafoPesadoImp[T]) Peso(desde, hasta T) int {
+func (g *grafoPesadoImp[T]) Peso(desde, hasta T) float64 {
 	return g.nodos.Obtener(desde).Obtener(hasta)
 }
 
@@ -77,7 +77,7 @@ func (g *grafoNoPesadoImp[T]) AgregarArista(desde, hasta T) {
 
 // --- Iterador Vertices ---
 type iteradorVertices[T comparable] struct {
-	iter TDADict.IterDiccionario[T, TDADict.Diccionario[T, int]]
+	iter TDADict.IterDiccionario[T, TDADict.Diccionario[T, float64]]
 }
 
 func (g *grafoImp[T]) IterVertices() IteradorVertices[T] {
@@ -101,7 +101,7 @@ func (i *iteradorVertices[T]) VerActual() T {
 
 // --- Iterador adyacentes ---
 type iteradorAdyacentes[T comparable] struct {
-	iter TDADict.IterDiccionario[T, int]
+	iter TDADict.IterDiccionario[T, float64]
 }
 
 func (g *grafoImp[T]) IterAdyacentes(nodo T) IteradorVertices[T] {
