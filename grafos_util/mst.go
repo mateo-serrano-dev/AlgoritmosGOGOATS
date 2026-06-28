@@ -6,13 +6,7 @@ import (
 	TDAGrafo "tdas/grafo"
 )
 
-type arista[T comparable] struct {
-	v    T
-	w    T
-	peso float64
-}
-
-func cmpPrim[T comparable](a, b arista[T]) int {
+func cmpPrim[T comparable](a, b Arista[T]) int {
 	if a.peso < b.peso {
 		return -1
 	} else if a.peso > b.peso {
@@ -34,13 +28,9 @@ func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
 	visitados := TDADict.CrearHash[T, bool]() // Usamos un hashmap como hashset
 	visitados.Guardar(v, true)
 
-	q := TDAHeap.CrearHeap[arista[T]](cmpPrim)
+	q := TDAHeap.CrearHeap[Arista[T]](cmpPrim)
 	for iterAdyacentes := grafo.IterAdyacentes(v); iterAdyacentes.HayAlgoMas(); iterAdyacentes.Avanzar() {
-		q.Encolar(arista[T]{
-			v:    v,
-			w:    iterAdyacentes.VerActual(),
-			peso: grafo.Peso(v, iterAdyacentes.VerActual()),
-		})
+		q.Encolar(CrearArista(v, iterAdyacentes.VerActual(), grafo.Peso(v, iterAdyacentes.VerActual())))
 	}
 
 	arbol := TDAGrafo.CrearGrafoPesado[T](false)
@@ -56,11 +46,7 @@ func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
 		visitados.Guardar(x.w, true)
 		for iterAdyacentes := grafo.IterAdyacentes(x.w); iterAdyacentes.HayAlgoMas(); iterAdyacentes.Avanzar() {
 			if !visitados.Pertenece(iterAdyacentes.VerActual()) {
-				q.Encolar(arista[T]{
-					v:    x.w,
-					w:    iterAdyacentes.VerActual(),
-					peso: grafo.Peso(x.w, iterAdyacentes.VerActual()),
-				})
+				q.Encolar(CrearArista(x.w, iterAdyacentes.VerActual(), grafo.Peso(x.w, iterAdyacentes.VerActual())))
 			}
 		}
 	}
