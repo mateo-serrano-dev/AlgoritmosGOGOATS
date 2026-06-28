@@ -22,7 +22,7 @@ func cmpDijkstra[T comparable](a, b verticeConDistancia[T]) int {
 }
 
 func Dijkstra[T comparable](grafo TDAGrafo.GrafoPesado[T], origen T) (TDADict.Diccionario[T, T], TDADict.Diccionario[T, float64]) {
-	// Precondicion: origen debe pertencer al grafo
+	// Precondicion: origen debe pertencer al grafo y los pesos deben ser positivos
 	dist := TDADict.CrearHash[T, float64]()
 	padres := TDADict.CrearHash[T, T]()
 

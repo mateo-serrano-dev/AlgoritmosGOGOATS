@@ -7,6 +7,7 @@ import (
 )
 
 func OrdenTopologico[T comparable](grafo TDAGrafo.Grafo[T]) []T {
+	// Precondicion: el grafo debe ser dirigido
 	grados := TDADict.CrearHash[T, int]()
 	for iter := grafo.IterVertices(); iter.HayAlgoMas(); iter.Avanzar() {
 		v := iter.VerActual()
