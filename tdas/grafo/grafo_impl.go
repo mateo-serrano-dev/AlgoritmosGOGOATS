@@ -47,6 +47,10 @@ func (g *grafoImp[T]) CantidadAristas(dato T) int {
 	return g.nodos.Obtener(dato).Cantidad()
 }
 
+func (g *grafoImp[T]) PerteneceVertice(dato T) bool {
+	return g.nodos.Pertenece(dato)
+}
+
 // --- Pesado o No Pesado ---
 type grafoPesadoImp[T comparable] struct {
 	grafoImp[T]

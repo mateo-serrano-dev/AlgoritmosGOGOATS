@@ -6,6 +6,7 @@ type Grafo[T comparable] interface {
 	BorrarArista(T, T)
 	CantidadVertices() int
 	CantidadAristas(T) int
+	PerteneceVertice(T) bool
 
 	IterVertices() IteradorVertices[T]
 	IterAdyacentes(T) IteradorVertices[T]
