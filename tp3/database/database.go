@@ -8,7 +8,7 @@ import (
 
 type Database struct {
 	ciudades TDADict.Diccionario[string, Models.Ciudad]
-	grafo    TDAGrafo.Grafo[Models.Ciudad]
+	grafo    TDAGrafo.GrafoPesado[Models.Ciudad]
 }
 
 func CrearDatabase() *Database {
@@ -26,6 +26,10 @@ func (db *Database) ObtenerCiudad(s string) Models.Ciudad {
 	return db.ciudades.Obtener(s)
 }
 
-func (db *Database) CargarGrafo(g TDAGrafo.Grafo[Models.Ciudad]) {
+func (db *Database) CargarGrafo(g TDAGrafo.GrafoPesado[Models.Ciudad]) {
 	db.grafo = g
+}
+
+func (db *Database) ObtenerGrafo() TDAGrafo.GrafoPesado[Models.Ciudad] {
+	return db.grafo
 }
