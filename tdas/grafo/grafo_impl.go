@@ -2,6 +2,8 @@ package grafo
 
 import TDADict "tdas/diccionario"
 
+const _NODO_NO_EXISTE = "El nodo ingresado no existe."
+
 type grafoImp[T comparable] struct {
 	nodos    TDADict.Diccionario[T, TDADict.Diccionario[T, float64]]
 	dirigido bool
@@ -25,6 +27,10 @@ func (g *grafoImp[T]) AgregarVertice(dato T) {
 }
 
 func (g *grafoImp[T]) BorrarVertice(dato T) {
+	if !g.PerteneceVertice(dato) {
+		panic(_NODO_NO_EXISTE)
+	}
+
 	g.nodos.Borrar(dato)
 	for iter := g.nodos.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
 		_, vecinos := iter.VerActual()
@@ -33,6 +39,10 @@ func (g *grafoImp[T]) BorrarVertice(dato T) {
 }
 
 func (g *grafoImp[T]) BorrarArista(desde, hasta T) {
+	if !g.PerteneceVertice(desde) || !g.PerteneceVertice(hasta) {
+		panic(_NODO_NO_EXISTE)
+	}
+
 	g.nodos.Obtener(desde).Borrar(hasta)
 	if !g.dirigido {
 		g.nodos.Obtener(hasta).Borrar(desde)
@@ -61,6 +71,10 @@ type grafoNoPesadoImp[T comparable] struct {
 }
 
 func (g *grafoImp[T]) agregarArista(desde, hasta T, peso float64) {
+	if !g.PerteneceVertice(desde) || !g.PerteneceVertice(hasta) {
+		panic(_NODO_NO_EXISTE)
+	}
+
 	g.nodos.Obtener(desde).Guardar(hasta, peso)
 	if !g.dirigido {
 		g.nodos.Obtener(desde).Guardar(hasta, peso)
@@ -72,6 +86,10 @@ func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta T, peso float64) {
 }
 
 func (g *grafoPesadoImp[T]) Peso(desde, hasta T) float64 {
+	if !g.PerteneceVertice(desde) || !g.PerteneceVertice(hasta) {
+		panic(_NODO_NO_EXISTE)
+	}
+
 	return g.nodos.Obtener(desde).Obtener(hasta)
 }
 
@@ -109,6 +127,10 @@ type iteradorAdyacentes[T comparable] struct {
 }
 
 func (g *grafoImp[T]) IterAdyacentes(nodo T) IteradorVertices[T] {
+	if !g.PerteneceVertice(nodo) {
+		panic(_NODO_NO_EXISTE)
+	}
+
 	i := new(iteradorAdyacentes[T])
 	i.iter = g.nodos.Obtener(nodo).Iterador()
 	return i
