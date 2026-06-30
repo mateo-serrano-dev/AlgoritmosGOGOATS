@@ -2,6 +2,7 @@ package grafos_util
 
 import (
 	"math"
+	"slices"
 	TDAHeap "tdas/cola_prioridad"
 	TDADict "tdas/diccionario"
 	TDAGrafo "tdas/grafo"
@@ -57,4 +58,17 @@ func Dijkstra[T comparable](grafo TDAGrafo.GrafoPesado[T], origen T) (TDADict.Di
 		}
 	}
 	return padres, dist
+}
+
+func ReconstruirCamino[T comparable](padres TDADict.Diccionario[T, T], origen, destino T) []T {
+	res := make([]T, 0)
+	// Reconstruimos el camino desde el destino al origen, siendo necesario invertir el arreglo final
+	actual := destino
+	for actual != origen {
+		res = append(res, actual)
+		actual = padres.Obtener(actual)
+	}
+	res = append(res, origen)
+	slices.Reverse(res)
+	return res
 }
