@@ -6,6 +6,7 @@ type Grafo[T comparable] interface {
 	BorrarArista(T, T)
 	CantidadVertices() int
 	CantidadAristas(T) int
+	PerteneceVertice(T) bool
 
 	IterVertices() IteradorVertices[T]
 	IterAdyacentes(T) IteradorVertices[T]
@@ -14,8 +15,8 @@ type Grafo[T comparable] interface {
 type GrafoPesado[T comparable] interface {
 	Grafo[T]
 
-	AgregarArista(T, T, int)
-	Peso(T, T) int
+	AgregarArista(T, T, float64)
+	Peso(T, T) float64
 }
 
 type GrafoNoPesado[T comparable] interface {
