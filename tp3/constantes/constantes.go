@@ -44,3 +44,4 @@ const KML_LINESTRING = `        <Placemark>
 const CODIGO_DE_PERMISO = 0644
 
 const TIEMPO_TOTAL = "Tiempo total: %d\n"
+const PESO_TOTAL = "Peso total: %d\n"
