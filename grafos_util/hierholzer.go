@@ -19,7 +19,7 @@ func hierholzer[T comparable](grafo TDAGrafo.GrafoPesado[T], v T, pila TDAPila.P
 		}
 	}
 	// Previo a apilar visitamos cada vértice adyacente de v
-	// Visitando así cada arista del grafo para cada par vértices
+	// Visitando así cada arista del grafo
 	pila.Apilar(v)
 }
 
