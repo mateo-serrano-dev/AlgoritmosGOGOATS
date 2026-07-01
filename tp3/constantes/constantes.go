@@ -3,6 +3,8 @@ package tp3
 const NO_EXISTE_ARCHIVO = "No existe el archivo %s\n"
 const ARCHIVO_PAJEK_ERR = "Mal formato de pajek\n"
 const ERR_EXPORTAR = "Hubo un error al exportar\n"
+const ERR_ABRIR_ARCHIVO = "Error al abrir el archivo\n"
+const ARCHIVO_CSV_ERR = "Mal formato de csv\n"
 
 const ERR_ARGS = "Cantidad de parámetros incorrecta\n"
 const ARGS_VIAJE = 2
