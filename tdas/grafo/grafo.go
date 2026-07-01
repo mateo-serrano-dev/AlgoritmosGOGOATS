@@ -22,6 +22,9 @@ type Grafo[T comparable] interface {
 	//Verifica si el dato T existe en el grafo.
 	PerteneceVertice(T) bool
 
+	// Devuelve true si el grafo es dirigido y false si el grafo es no dirigido
+	EsDirigido() bool
+
 	//Devuelve un iterador que permite iterar por todos los vertices que
 	//existen en el grafo.
 	IterVertices() IteradorVertices[T]

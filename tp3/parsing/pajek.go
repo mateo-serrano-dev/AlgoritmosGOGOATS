@@ -46,52 +46,6 @@ func ImportarPajek(ruta string, db *DB.Database) {
 	db.CargarGrafo(resultado)
 }
 
-func ExportarPajek(ruta string, g TDAGrafo.GrafoPesado[Models.Ciudad]) {
-	archivo, err := os.Create(ruta)
-	if err != nil {
-		fmt.Printf(Constantes.ERR_EXPORTAR)
-	}
-	defer archivo.Close()
-
-	vertices := g.CantidadVertices()
-	aristas := 0
-	lineas := make([]string, vertices)
-
-	dataWriter := bufio.NewWriter(archivo)
-	dataWriter.WriteString(strconv.Itoa(vertices))
-
-	for iter := g.IterVertices(); iter.HayAlgoMas(); iter.Avanzar() {
-		ciudad := iter.VerActual()
-		linea := fmt.Sprintf("%s,%f,%f\n", ciudad.Nombre(), ciudad.Latitud(), ciudad.Longitud())
-
-		_, err := dataWriter.WriteString(linea)
-		if err != nil {
-			fmt.Printf(Constantes.ERR_EXPORTAR)
-		}
-
-		aristas += g.CantidadAristas(ciudad)
-		for subIter := g.IterAdyacentes(ciudad); iter.HayAlgoMas(); iter.VerActual() {
-			destino := subIter.VerActual()
-			arista := fmt.Sprintf("%s,%s,%f\n", ciudad.Nombre(), destino.Nombre(), g.Peso(ciudad, destino))
-			lineas = append(lineas, arista)
-		}
-	}
-
-	_, err = dataWriter.WriteString(strconv.Itoa(aristas))
-	if err != nil {
-		fmt.Printf(Constantes.ERR_EXPORTAR)
-	}
-
-	for _, linea := range lineas {
-		_, err = dataWriter.WriteString(linea)
-		if err != nil {
-			fmt.Printf(Constantes.ERR_EXPORTAR)
-		}
-	}
-
-	dataWriter.Flush()
-}
-
 func proximoNumero(s *bufio.Scanner) int {
 	s.Scan()
 	linea := s.Text()

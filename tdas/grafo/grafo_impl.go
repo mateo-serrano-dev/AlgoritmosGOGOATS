@@ -61,6 +61,10 @@ func (g *grafoImp[T]) PerteneceVertice(dato T) bool {
 	return g.nodos.Pertenece(dato)
 }
 
+func (g *grafoImp[T]) EsDirigido() bool {
+	return g.dirigido
+}
+
 // --- Pesado o No Pesado ---
 type grafoPesadoImp[T comparable] struct {
 	grafoImp[T]

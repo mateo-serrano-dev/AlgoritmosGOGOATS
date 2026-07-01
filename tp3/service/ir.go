@@ -4,20 +4,11 @@ import (
 	"fmt"
 	"grafos_util"
 	"math"
-	"strings"
 	Constantes "tp3/constantes"
 	DB "tp3/database"
 	Models "tp3/models"
 	"tp3/output"
 )
-
-func construirMensajeSalida(camino []Models.Ciudad) string {
-	ciudades := make([]string, 0)
-	for _, ciudad := range camino {
-		ciudades = append(ciudades, ciudad.Nombre())
-	}
-	return strings.Join(ciudades, " -> ")
-}
 
 func IrCmd(db *DB.Database, desde, hasta Models.Ciudad, ruta string) {
 	grafo := db.ObtenerGrafo()
@@ -31,12 +22,12 @@ func IrCmd(db *DB.Database, desde, hasta Models.Ciudad, ruta string) {
 		return
 	}
 
-	camino := grafos_util.ReconstruirCamino(padres, desde, hasta)
+	camino := grafos_util.ReconstruirCaminoDijkstra(padres, desde, hasta)
 	err := output.ExportarKml(camino, ruta)
 	if err != nil {
 		fmt.Print(Constantes.ERR_EXPORTAR)
 		return
 	}
-	fmt.Println(construirMensajeSalida(camino))
+	fmt.Println(output.ConstruirMensajeSalida(camino))
 	fmt.Printf(Constantes.TIEMPO_TOTAL, int(dist.Obtener(hasta)))
 }

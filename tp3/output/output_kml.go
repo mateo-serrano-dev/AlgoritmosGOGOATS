@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 	Constantes "tp3/constantes"
-	Models "tp3/models"
+	Modelos "tp3/models"
 )
 
-func ExportarKml(camino []Models.Ciudad, ruta string) error {
+func ExportarKml(camino []Modelos.Ciudad, ruta string) error {
 	var archivo strings.Builder
 
 	archivo.WriteString(Constantes.KML_HEADER)

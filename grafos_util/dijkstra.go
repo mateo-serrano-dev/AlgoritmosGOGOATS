@@ -60,7 +60,7 @@ func Dijkstra[T comparable](grafo TDAGrafo.GrafoPesado[T], origen T) (TDADict.Di
 	return padres, dist
 }
 
-func ReconstruirCamino[T comparable](padres TDADict.Diccionario[T, T], origen, destino T) []T {
+func ReconstruirCaminoDijkstra[T comparable](padres TDADict.Diccionario[T, T], origen, destino T) []T {
 	res := make([]T, 0)
 	// Reconstruimos el camino desde el destino al origen, siendo necesario invertir el arreglo final
 	actual := destino

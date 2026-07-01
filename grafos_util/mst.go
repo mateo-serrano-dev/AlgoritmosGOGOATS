@@ -15,13 +15,13 @@ func cmpPrim[T comparable](a, b Arista[T]) int {
 	return 0
 }
 
-func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
+func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) (TDAGrafo.GrafoPesado[T], float64) {
 	// Precondicion: El grafo recibido debe ser no dirigido, conexo y pesado
 
 	// Buscamos un vértice aleatorio
 	iter := grafo.IterVertices()
 	if !iter.HayAlgoMas() {
-		return nil
+		return nil, 0
 	}
 	v := iter.VerActual()
 
@@ -30,11 +30,14 @@ func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
 
 	q := TDAHeap.CrearHeap[Arista[T]](cmpPrim)
 	for iterAdyacentes := grafo.IterAdyacentes(v); iterAdyacentes.HayAlgoMas(); iterAdyacentes.Avanzar() {
-		q.Encolar(CrearArista(v, iterAdyacentes.VerActual(), grafo.Peso(v, iterAdyacentes.VerActual())))
+		w := iterAdyacentes.VerActual()
+		q.Encolar(CrearArista(v, w, grafo.Peso(v, w)))
 	}
 
 	arbol := TDAGrafo.CrearGrafoPesado[T](false)
 	arbol.AgregarVertice(v)
+
+	var pesoTotal float64
 
 	for !q.EstaVacia() {
 		x := q.Desencolar()
@@ -43,6 +46,8 @@ func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
 		}
 		arbol.AgregarVertice(x.w)
 		arbol.AgregarArista(x.v, x.w, x.peso)
+		pesoTotal += x.peso
+
 		visitados.Guardar(x.w, true)
 		for iterAdyacentes := grafo.IterAdyacentes(x.w); iterAdyacentes.HayAlgoMas(); iterAdyacentes.Avanzar() {
 			if !visitados.Pertenece(iterAdyacentes.VerActual()) {
@@ -50,5 +55,5 @@ func Prim[T comparable](grafo TDAGrafo.GrafoPesado[T]) TDAGrafo.GrafoPesado[T] {
 			}
 		}
 	}
-	return arbol
+	return arbol, pesoTotal
 }
