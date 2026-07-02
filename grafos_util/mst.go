@@ -8,9 +8,9 @@ import (
 
 func cmpPrim[T comparable](a, b Arista[T]) int {
 	if a.peso < b.peso {
-		return -1
-	} else if a.peso > b.peso {
 		return 1
+	} else if a.peso > b.peso {
+		return -1
 	}
 	return 0
 }

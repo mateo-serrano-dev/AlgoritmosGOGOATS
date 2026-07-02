@@ -39,7 +39,7 @@ func ExportarPajek(ruta string, g TDAGrafo.GrafoPesado[Models.Ciudad]) {
 		for subIter := g.IterAdyacentes(ciudad); subIter.HayAlgoMas(); subIter.Avanzar() {
 			destino := subIter.VerActual()
 			if ciudad.Nombre() < destino.Nombre() {
-				arista := fmt.Sprintf("%s,%s,%f\n", ciudad.Nombre(), destino.Nombre(), g.Peso(ciudad, destino))
+				arista := fmt.Sprintf("%s,%s,%d\n", ciudad.Nombre(), destino.Nombre(), int(g.Peso(ciudad, destino)))
 				lineas = append(lineas, arista)
 				aristas++
 			}
