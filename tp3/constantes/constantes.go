@@ -6,6 +6,8 @@ const ERR_EXPORTAR = "Hubo un error al exportar\n"
 const ERR_ABRIR_ARCHIVO = "Error al abrir el archivo\n"
 const ARCHIVO_CSV_ERR = "Mal formato de csv\n"
 
+const ERR_CMD = "No se pudo parsear el comando\n"
+
 const ERR_ARGS = "Cantidad de parámetros incorrecta\n"
 const ARGS_VIAJE = 2
 const ARGS_ITINERARIO = 1

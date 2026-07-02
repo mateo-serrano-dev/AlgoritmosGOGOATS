@@ -10,7 +10,7 @@ import (
 	Parsing "tp3/parsing"
 )
 
-const _CANTIDAD_ARGUMENTOS = 1
+const _CANTIDAD_ARGUMENTOS = 2
 
 func main() {
 	db := DB.CrearDatabase()
@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	ciudadesPajek := os.Args[0]
+	ciudadesPajek := os.Args[1]
 	Parsing.ImportarPajek(ciudadesPajek, db)
 
 	comandos := Comando.ObtenerComandos(db)
@@ -34,6 +34,7 @@ func main() {
 
 		comando, args, hayError := Parsing.ParsearComando(linea, comandos)
 		if hayError {
+			fmt.Print(Constantes.ERR_CMD)
 			continue
 		}
 		comando.Ejecutar(args)

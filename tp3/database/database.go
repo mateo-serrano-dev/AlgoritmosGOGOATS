@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	TDADict "tdas/diccionario"
 	TDAGrafo "tdas/grafo"
 	Models "tp3/models"
@@ -32,4 +33,12 @@ func (db *Database) CargarGrafo(g TDAGrafo.GrafoPesado[Models.Ciudad]) {
 
 func (db *Database) ObtenerGrafo() TDAGrafo.GrafoPesado[Models.Ciudad] {
 	return db.grafo
+}
+
+func (db *Database) ImprimirCiudades() {
+	fmt.Println("Ciudades: ")
+	for it := db.ciudades.Iterador(); it.HayAlgoMas(); it.Avanzar() {
+		_, city := it.VerActual()
+		fmt.Println(city.Nombre())
+	}
 }
