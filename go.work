@@ -2,5 +2,6 @@ go 1.25
 
 use (
 	./tdas
-	./tp2
+	./tp3
+	./grafos_util
 )
