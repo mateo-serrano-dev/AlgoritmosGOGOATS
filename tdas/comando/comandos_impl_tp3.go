@@ -22,6 +22,11 @@ func (c *IrCmd) Ejecutar(args []string) {
 		return
 	}
 
+	if !c.database.ExisteCiudad(args[0]) || !c.database.ExisteCiudad(args[1]) {
+		fmt.Println(Constantes.ERR_RECORRIDO_NO_ENCONTRADO)
+		return
+	}
+
 	ciudad1 := c.database.ObtenerCiudad(args[0])
 	ciudad2 := c.database.ObtenerCiudad(args[1])
 	ruta := args[2]
@@ -39,6 +44,11 @@ func (c *ItinerarioCmd) Ejecutar(args []string) {
 
 func (c *ViajeCmd) Ejecutar(args []string) {
 	if !c.cantidadArgumentosCorrecta(args) {
+		return
+	}
+
+	if !c.database.ExisteCiudad(args[0]) {
+		fmt.Println(Constantes.ERR_RECORRIDO_NO_ENCONTRADO)
 		return
 	}
 

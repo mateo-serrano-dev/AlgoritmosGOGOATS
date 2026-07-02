@@ -47,8 +47,9 @@ func Dijkstra[T comparable](grafo TDAGrafo.GrafoPesado[T], origen T) (TDADict.Di
 		}
 		for iter := grafo.IterAdyacentes(v.vertice); iter.HayAlgoMas(); iter.Avanzar() {
 			w := iter.VerActual()
-			if dist.Obtener(v.vertice)+grafo.Peso(v.vertice, w) < dist.Obtener(w) {
-				dist.Guardar(w, dist.Obtener(v.vertice)+grafo.Peso(v.vertice, w))
+			nuevoPeso := dist.Obtener(v.vertice) + grafo.Peso(v.vertice, w)
+			if nuevoPeso < dist.Obtener(w) {
+				dist.Guardar(w, nuevoPeso)
 				padres.Guardar(w, v.vertice)
 				q.Encolar(verticeConDistancia[T]{
 					vertice:    w,

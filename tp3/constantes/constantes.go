@@ -39,7 +39,9 @@ const KML_LINESTRING = `        <Placemark>
                 <coordinates>%s</coordinates>
             </LineString>
         </Placemark>
-    </Document>
+`
+
+const KML_FOOTER = `    </Document>
 </kml>
 `
 

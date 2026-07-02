@@ -3,6 +3,7 @@ package grafo
 import TDADict "tdas/diccionario"
 
 const _NODO_NO_EXISTE = "El nodo ingresado no existe."
+const _ARISTA_NO_EXISTE = "La arista no existe."
 
 type grafoImp[T comparable] struct {
 	nodos    TDADict.Diccionario[T, TDADict.Diccionario[T, float64]]
@@ -81,7 +82,7 @@ func (g *grafoImp[T]) agregarArista(desde, hasta T, peso float64) {
 
 	g.nodos.Obtener(desde).Guardar(hasta, peso)
 	if !g.dirigido {
-		g.nodos.Obtener(desde).Guardar(hasta, peso)
+		g.nodos.Obtener(hasta).Guardar(desde, peso)
 	}
 }
 
@@ -92,6 +93,10 @@ func (g *grafoPesadoImp[T]) AgregarArista(desde, hasta T, peso float64) {
 func (g *grafoPesadoImp[T]) Peso(desde, hasta T) float64 {
 	if !g.PerteneceVertice(desde) || !g.PerteneceVertice(hasta) {
 		panic(_NODO_NO_EXISTE)
+	}
+
+	if !g.nodos.Obtener(desde).Pertenece(hasta) {
+		panic(_ARISTA_NO_EXISTE)
 	}
 
 	return g.nodos.Obtener(desde).Obtener(hasta)
